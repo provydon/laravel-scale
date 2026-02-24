@@ -88,7 +88,7 @@ You need **both** a web service and a **worker-scheduler** service (Background W
 - **Scheduler**: Running the scheduler (`schedule:work`) on a single dedicated worker avoids race conditions. If every web container ran the scheduler, multiple instances could trigger the same task at once (e.g. duplicate emails or cleanup jobs).
 - **Queue and HTTP**: Running `queue:work` and the scheduler on the worker keeps background work off the web processes. That way web containers stay focused on handling requests instead of being slowed or blocked by queued jobs and cron.
 
-See **docker/README.md** (published into your app) for the full stateless checklist, build commands, **PHP version** (how the image picks PHP 8.2–8.5 and how to pin a version), **database** (how to switch `pdo_pgsql` to MySQL or SQLite; we default to PostgreSQL because most autoscaling platforms use it), and **backend-only apps** (how to remove the Node/frontend stage if your app is API-only).
+See **docker/README.md** (published into your app) for the full stateless checklist, build commands, **PHP version** (how the image picks PHP 8.2–8.5 and how to pin a version), **database** (the image can use any Laravel-supported database—PostgreSQL, MySQL, SQLite, etc.; docker/README.md explains how to switch the PHP extension and driver), and **backend-only apps** (how to remove the Node/frontend stage if your app is API-only).
 
 ## What it does
 
@@ -123,7 +123,7 @@ See **docker/README.md** (published into your app) for the full stateless checkl
    - `APP_KEY` (generate with `php artisan key:generate --show` locally).
    - `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://your-domain.com` (use your own domain; platform defaults like `*.onrender.com` can cause session issues).
    - `DEPLOYMENT_TYPE=web`.
-   - Database: `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` (or use Render’s **PostgreSQL** and copy its env vars).
+   - Database: `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`. Use any database (PostgreSQL, MySQL, SQLite, etc.); on Render you can add a PostgreSQL instance and copy its env vars.
    - Stateless: `SESSION_DRIVER=database`, `CACHE_STORE=database`, `QUEUE_CONNECTION=database`, and if using S3: `FILESYSTEM_DISK=s3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`.
    - Optional—broadcasting: `BROADCAST_CONNECTION=pusher` (or reverb/ably) and driver-specific env vars (e.g. `PUSHER_APP_ID`, `PUSHER_APP_KEY`, etc.) on both Web and Worker.
 5. **Port**: set **Port** to **8000** (Octane listens on 8000).
@@ -151,9 +151,9 @@ If **`npm run build` fails** (e.g. Vite/Wayfinder errors): add a Docker build ar
 
 Render injects some vars automatically (e.g. `RENDER_EXTERNAL_URL`, `RENDER_INSTANCE_ID`). The Docker entrypoint skips copying `RENDER_*` from host env into `.env` so they don’t overwrite; your app can still read them from `getenv()` or `$_ENV` if needed.
 
-### 4. Database (PostgreSQL)
+### 4. Database
 
-- Create a **PostgreSQL** instance in Render (Dashboard → New + → PostgreSQL), then in your Web (and Worker) service add the **Internal Database URL** (or individual vars) as env vars. Laravel’s `config/database.php` uses `DB_*` by default.
+Use any database Laravel supports (PostgreSQL, MySQL, SQLite, etc.). Set `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` in your Web and Worker services. On Render, you can create a PostgreSQL instance (Dashboard → New + → PostgreSQL) and add its **Internal Database URL** or individual vars. The Docker image includes `pdo_pgsql` by default; see **docker/README.md** to use MySQL, SQLite, or another driver.
 
 ### 5. Redis or key-value cache (optional)
 
@@ -173,7 +173,7 @@ Use **your own domain or subdomain** for the app instead of the platform’s def
 2. **Install once** – When ready to deploy: `composer require laravel-scale/laravel-scale --dev` and `php artisan scale:install`.
 3. **Commit** – Commit `docker/`, `.dockerignore`, `config/octane.php`, and the `.gitignore` changes. Push to GitHub/GitLab.
 4. **Stateless config** – In `.env.example` (and your platform’s env), set `SESSION_DRIVER=database`, `CACHE_STORE=database`, `QUEUE_CONNECTION=database`. Use S3 for uploads. Add Redis extension to Dockerfile if using Redis.
-5. **Platform** – Create a Web Service (Docker) and a Background Worker on Render (or similar). Point both at your repo. Set **Dockerfile Path** to `docker/Dockerfile` for each. Add PostgreSQL, set env vars, deploy.
+5. **Platform** – Create a Web Service (Docker) and a Background Worker on Render (or similar). Point both at your repo. Set **Dockerfile Path** to `docker/Dockerfile` for each. Add a database (e.g. PostgreSQL on Render) and set env vars, deploy.
 6. **Iterate** – Push code; platform rebuilds from the repo. No `scale:install` in CI—everything is already in the repo.
 
 **Local testing (optional):** Run `docker build -f docker/Dockerfile --build-arg DEPLOYMENT_TYPE=web -t app:latest .` and `docker run -p 8000:8000 -e APP_KEY=base64:xxx -e DB_*="..." app:latest` to test the image locally.
