@@ -1,6 +1,6 @@
 # Laravel Scale
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/provydon/laravel-scale.svg?style=flat-square)](https://packagist.org/packages/provydon/laravel-scale)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/provydon/laravel-scale.svg?style=flat-square)](https://packagist.org/packages/provydon/laravel-scale) [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/provydon/laravel-scale?style=flat-square)](https://github.com/provydon/laravel-scale/releases)
 
 Scale your Laravel app with one install: it comes with **Laravel Octane (FrankenPHP)**, a production-ready Docker setup, and a stateless web + worker layout that runs on Render, Laravel Cloud, Fly.io, Railway, and other container platforms.
 
