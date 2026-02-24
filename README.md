@@ -1,5 +1,7 @@
 # Laravel Scale
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/laravel-scale/laravel-scale.svg?style=flat-square)](https://packagist.org/packages/laravel-scale/laravel-scale)
+
 Scale your Laravel app. A set of libraries—one install gives you Laravel Octane (FrankenPHP), a production Docker setup, and a stateless web + worker layout that runs on Render, Fly.io, Railway, and other container platforms.
 
 **Tech details:** Octane for high-concurrency HTTP, a single Docker image (web or worker via `DEPLOYMENT_TYPE`), supervisor for Octane + queue + scheduler, and guidance for stateless session, cache, and file storage so your app scales horizontally.
@@ -15,7 +17,7 @@ Scale your Laravel app. A set of libraries—one install gives you Laravel Octan
 
 Run `scale:install` **once** from your local machine. The published files become part of your repo—commit them and push. CI and deployment platforms (Render, Fly.io, etc.) build from the repo; they do not run `scale:install` again.
 
-From Packagist (when published):
+**From Packagist:**
 
 ```bash
 composer require laravel-scale/laravel-scale --dev
@@ -24,7 +26,7 @@ php artisan scale:install
 
 Then commit `docker/`, `.dockerignore`, and `config/octane.php` (if Octane was installed). Production builds use `composer install --no-dev`, so the package is not shipped in the image. Run `composer update` to pull the latest Octane and other dependencies.
 
-As a local path (during development of this package), in your Laravel app’s `composer.json`:
+**From a local path** (when developing this package), in your Laravel app’s `composer.json`:
 
 ```json
 "repositories": [
