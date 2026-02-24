@@ -11,7 +11,8 @@ class InstallCommand extends Command
                             {--no-octane : Skip running octane:install (e.g. if already installed)}
                             {--no-dockerignore : Skip publishing .dockerignore}
                             {--no-gitignore : Skip updating .gitignore}
-                            {--no-wayfinder : Skip Wayfinder vite/gitignore adjustments}';
+                            {--no-wayfinder : Skip Wayfinder vite/gitignore adjustments}
+                            {--no-ziggy : Skip Ziggy vendor-path fix for Docker frontend builds}';
 
     protected $description = 'Publish Docker files and optionally install Octane (FrankenPHP) for production scaling';
 
@@ -37,6 +38,11 @@ class InstallCommand extends Command
         if ($usesWayfinder) {
             $this->info('Wayfinder detected: adjusting Vite config and .gitignore for Docker builds...');
             $this->applyWayfinderViteFix();
+        }
+
+        if (! $this->option('no-ziggy') && $this->usesZiggyVendorPath()) {
+            $this->info('Ziggy (vendor path) detected: switching to ziggy-js so Docker frontend build can resolve it...');
+            $this->applyZiggyFix();
         }
 
         if (! $this->option('no-gitignore')) {
@@ -172,6 +178,76 @@ class InstallCommand extends Command
         );
 
         file_put_contents($path, $contents);
+    }
+
+    /** @return array<string> */
+    private function getJsEntryPaths(): array
+    {
+        $dir = base_path('resources/js');
+        if (! is_dir($dir)) {
+            return [];
+        }
+
+        $paths = [];
+        $it = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+        foreach ($it as $file) {
+            if ($file->isFile() && preg_match('/\.(js|jsx|ts|tsx|mjs|cjs)$/', $file->getFilename())) {
+                $paths[] = $file->getPathname();
+            }
+        }
+
+        return $paths;
+    }
+
+    private function usesZiggyVendorPath(): bool
+    {
+        $needle = 'vendor/tightenco/ziggy';
+        foreach ($this->getJsEntryPaths() as $path) {
+            if (str_contains(file_get_contents($path), $needle)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function applyZiggyFix(): void
+    {
+        $rewritten = 0;
+        $replacement = "from 'ziggy-js'";
+        foreach ($this->getJsEntryPaths() as $path) {
+            $contents = file_get_contents($path);
+            $newContents = preg_replace(
+                "/from\s+['\"][^'\"]*vendor\/tightenco\/ziggy['\"]/",
+                $replacement,
+                $contents,
+                -1,
+                $count
+            );
+            if ($count > 0) {
+                file_put_contents($path, $newContents);
+                $rewritten += $count;
+            }
+        }
+
+        $packagePath = base_path('package.json');
+        if ($rewritten > 0 && file_exists($packagePath)) {
+            $json = json_decode(file_get_contents($packagePath), true);
+            if (is_array($json)) {
+                $json['dependencies'] = $json['dependencies'] ?? [];
+                if (empty($json['dependencies']['ziggy-js'])) {
+                    $json['dependencies']['ziggy-js'] = '^2.6.0';
+                    ksort($json['dependencies']);
+                    file_put_contents(
+                        $packagePath,
+                        json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n"
+                    );
+                    $this->info('Added ziggy-js to package.json dependencies. Run npm install.');
+                }
+            }
+        }
     }
 
     private const GITIGNORE_WAYFINDER_MARKER = '# Laravel Scale - Wayfinder';
