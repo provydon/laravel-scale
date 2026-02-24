@@ -42,6 +42,8 @@ The Docker image includes **all three** Laravel database drivers by default:
 
 No Dockerfile edits are required. Set `DB_CONNECTION` and the usual `DB_*` env vars (e.g. on Render) and it works. Use SQLite for quick local testing; use PostgreSQL or MySQL (managed on Render, Fly.io, Railway, etc.) for production.
 
+**Ensure your database is reachable from your containers.** If the DB is on a separate host, it must accept connections from the internet or your platform’s network with the right port open: **3306** (MySQL), **5432** (PostgreSQL). Managed DBs (e.g. Render, Fly, Railway) are typically reachable when attached to your service; for self-hosted or external DBs, open the port in the firewall and allow your app’s outbound IPs (or use a private network).
+
 ## Deployment types (Render)
 
 - **Web**: build with `DEPLOYMENT_TYPE=web` (default). Starts Octane + HTTP on 8000.
