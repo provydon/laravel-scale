@@ -21,8 +21,14 @@ class ForceHttpsServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (! $this->app->runningInConsole() && ! $this->app->environment('local')) {
-            URL::forceScheme('https');
+        if ($this->app->runningInConsole()) {
+            return;
         }
+        $appUrl = config('app.url', '');
+        // Force HTTPS in production, or whenever APP_URL is https (e.g. prod with APP_ENV=local set by mistake)
+        if ($this->app->environment('local') && ! str_starts_with($appUrl, 'https://')) {
+            return;
+        }
+        URL::forceScheme('https');
     }
 }
