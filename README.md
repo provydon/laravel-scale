@@ -40,15 +40,13 @@ Run `scale:install` **once** from your local machine. The published files become
 **From [Packagist](https://packagist.org/packages/provydon/laravel-scale):**
 
 ```bash
-composer require provydon/laravel-scale
+composer require provydon/laravel-scale --dev --with-all-dependencies
 php artisan scale:install
 ```
 
-Add `--dev` if you want the package only as a development dependency (then production’s `composer install --no-dev` won’t install it; the published `ForceHttpsServiceProvider` and Docker files still run in production).
-
 Then commit `docker/`, `.dockerignore`, `app/Providers/ForceHttpsServiceProvider.php`, `bootstrap/providers.php`, and `config/octane.php`. Run `composer update` to pull the latest Octane and other dependencies.
 
-**When you upgrade the package** (e.g. `composer update provydon/laravel-scale`), run `php artisan scale:install` again to publish the latest Docker files and fixes, then commit any changed files.
+**When you upgrade the package** (e.g. `composer update provydon/laravel-scale --with-all-dependencies`), run `php artisan scale:install` again to publish the latest Docker files and fixes, then commit any changed files.
 
 This will:
 
@@ -68,7 +66,7 @@ Options:
 ## After install
 
 1. **Octane in production**  
-   `scale:install` adds or moves **`laravel/octane` into `require`** in your `composer.json` so the Docker image (which runs `composer install --no-dev`) gets Octane. You can add `laravel-scale` with `--dev` to keep it out of production.
+   `scale:install` adds or moves **`laravel/octane` into `require`** in your `composer.json` so the Docker image (which runs `composer install --no-dev`) gets Octane. The package is in `require-dev` so production’s `composer install --no-dev` won’t install it; the published files run in production.
 
 2. **Stateless setup**  
    In Render (and `.env.example`), set:
@@ -177,7 +175,7 @@ Use **your own domain or subdomain** for the app instead of the platform’s def
 ## Typical dev journey
 
 1. **Local setup** – Create your Laravel app, develop as usual (Blade, Inertia, API, etc.).
-2. **Install once** – When ready to deploy: `composer require provydon/laravel-scale` and `php artisan scale:install`.
+2. **Install once** – When ready to deploy: `composer require provydon/laravel-scale --dev --with-all-dependencies` and `php artisan scale:install`.
 3. **Commit** – Commit `docker/`, `.dockerignore`, `app/Providers/ForceHttpsServiceProvider.php`, `bootstrap/providers.php`, `config/octane.php`, and the `.gitignore` changes. Push to GitHub/GitLab.
 4. **Stateless config** – In `.env.example` (and your platform’s env), set `SESSION_DRIVER=database`, `CACHE_STORE=database`, `QUEUE_CONNECTION=database`. Use S3 for uploads. Add Redis extension to Dockerfile if using Redis.
 5. **Platform** – Create a Web Service (Docker) and a Background Worker on Render (or similar). Point both at your repo. Set **Dockerfile Path** to `docker/Dockerfile` for each. Add a database (e.g. PostgreSQL on Render) and set env vars, deploy.
@@ -210,7 +208,7 @@ If you’re developing this package or want to try it from a local clone, in you
 }
 ```
 
-Then run `composer update provydon/laravel-scale` and `php artisan scale:install`.
+Then run `composer update provydon/laravel-scale --with-all-dependencies` and `php artisan scale:install`.
 
 ## Support
 
