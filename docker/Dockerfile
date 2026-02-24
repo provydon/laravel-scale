@@ -43,6 +43,7 @@ RUN npm ci 2>/dev/null || npm install --legacy-peer-deps
 COPY resources ./resources
 COPY vite.config.* ./
 COPY tailwind.config.* ./
+COPY postcss.config.* ./
 
 RUN if [ "$SKIP_FRONTEND" = "1" ]; then mkdir -p public/build; else npm run build; fi
 # --- END FRONTEND ---
