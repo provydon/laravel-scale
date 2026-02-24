@@ -105,6 +105,8 @@ See **docker/README.md** (published into your app) for the full stateless checkl
 
 ## Deploying on Render.com
 
+> **Before you deploy to production:** Set **`APP_ENV=production`** in your Web and Worker environment variables on Render (or your platform). If you leave `APP_ENV=local` or leave it unset, the app may generate `http://` asset URLs and the page can appear blank (Mixed Content blocked by the browser). Set **`APP_URL`** to your production URL with `https://` (e.g. `https://myapp.onrender.com` or your custom domain) as well.
+
 **Important:** Set **Dockerfile Path** to `docker/Dockerfile` for both Web and Worker services (Render needs this because the Dockerfile lives in the `docker/` folder).
 
 ### 1. Create a Web Service (Docker)
