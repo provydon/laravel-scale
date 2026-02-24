@@ -171,6 +171,10 @@ php artisan octane:start --server=frankenphp
 
 Or your existing `composer dev` / `npm run dev` setup; the package only adds Docker and publishables for deployment.
 
+## Support
+
+<a href="https://buymeacoffee.com/provydon" target="_blank" rel="noopener noreferrer">Buy me a coffee</a>
+
 ## License
 
 MIT.
