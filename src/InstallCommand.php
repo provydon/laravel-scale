@@ -53,8 +53,11 @@ class InstallCommand extends Command
         $this->info('Ensuring proxy and HTTPS handling in bootstrap/app.php...');
         $this->ensureTrustProxiesInBootstrap();
 
+        $this->info('Registering ForceHttpsServiceProvider so production uses https:// without the package installed...');
+        $this->ensureForceHttpsProviderRegistered();
+
         $this->newLine();
-        $this->info('Done. Commit docker/, .dockerignore, and config/octane.php to your repo. Ensure your app is stateless: session and cache in DB (or Redis), files on S3/external. See README in docker/.');
+        $this->info('Done. Commit docker/, .dockerignore, app/Providers/ForceHttpsServiceProvider.php, bootstrap/providers.php, and config/octane.php to your repo. Ensure your app is stateless: session and cache in DB (or Redis), files on S3/external. See README in docker/.');
 
         return self::SUCCESS;
     }
@@ -77,6 +80,38 @@ class InstallCommand extends Command
 
         if ($contents !== null) {
             file_put_contents($path, $contents);
+        }
+    }
+
+    private function ensureForceHttpsProviderRegistered(): void
+    {
+        $providerClass = 'App\\Providers\\ForceHttpsServiceProvider::class';
+        $providerPath = base_path('app/Providers/ForceHttpsServiceProvider.php');
+
+        if (! file_exists($providerPath)) {
+            return;
+        }
+
+        $providersPath = base_path('bootstrap/providers.php');
+        if (! file_exists($providersPath)) {
+            return;
+        }
+
+        $contents = file_get_contents($providersPath);
+        if (str_contains($contents, 'ForceHttpsServiceProvider')) {
+            return;
+        }
+
+        // Append to the providers array (before the closing ];)
+        $contents = preg_replace(
+            '/(\n)(\s*)\];\s*$/',
+            '$1$2    ' . $providerClass . ",\n$2];",
+            $contents,
+            1
+        );
+
+        if ($contents !== null) {
+            file_put_contents($providersPath, $contents);
         }
     }
 

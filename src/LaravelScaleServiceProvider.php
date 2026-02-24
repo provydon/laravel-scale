@@ -2,7 +2,6 @@
 
 namespace LaravelScale\LaravelScale;
 
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class LaravelScaleServiceProvider extends ServiceProvider
@@ -14,14 +13,10 @@ class LaravelScaleServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Force HTTPS in non-local environments so asset and link URLs use https:// (avoids Mixed Content when behind a reverse proxy)
-        if (! $this->app->runningInConsole() && ! $this->app->environment('local')) {
-            URL::forceScheme('https');
-        }
-
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__ . '/../docker' => base_path('docker'),
+                __DIR__ . '/../stubs/ForceHttpsServiceProvider.php' => base_path('app/Providers/ForceHttpsServiceProvider.php'),
             ], 'laravel-scale');
 
             $this->publishes([

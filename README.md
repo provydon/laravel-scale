@@ -44,7 +44,9 @@ composer require laravel-scale/laravel-scale --dev
 php artisan scale:install
 ```
 
-Then commit `docker/`, `.dockerignore`, and `config/octane.php` (if Octane was installed). Production builds use `composer install --no-dev`, so the package is not shipped in the image. Run `composer update` to pull the latest Octane and other dependencies.
+Then commit `docker/`, `.dockerignore`, `app/Providers/ForceHttpsServiceProvider.php`, `bootstrap/providers.php`, and `config/octane.php`. Production builds use `composer install --no-dev`, so the package is not shipped in the image. Run `composer update` to pull the latest Octane and other dependencies.
+
+**When you upgrade the package** (e.g. `composer update laravel-scale/laravel-scale`), run `php artisan scale:install` again to publish the latest Docker files and fixes, then commit any changed files.
 
 This will:
 
@@ -96,6 +98,7 @@ See **docker/README.md** (published into your app) for the full stateless checkl
 
 - **docker/** — Dockerfile, entrypoint, `supervisord-web.conf` (Octane), `supervisord-worker.conf` (queue + scheduler), php.ini
 - **.dockerignore** — keeps build context small
+- **app/Providers/ForceHttpsServiceProvider.php** — forces `https://` for URLs in non-local environments (so production works behind a reverse proxy without Mixed Content; the package is dev-only so this lives in your app)
 - **docker/README.md** — stateless checklist (session/cache in DB or Redis, files on S3), PHP version, database options, backend-only variant
 
 **Requirements:** PHP ^8.2, Laravel ^11.0|^12.0, laravel/octane ^2.13 (FrankenPHP). Run `composer update` in your app to pull compatible versions.
@@ -171,7 +174,7 @@ Use **your own domain or subdomain** for the app instead of the platform’s def
 
 1. **Local setup** – Create your Laravel app, develop as usual (Blade, Inertia, API, etc.).
 2. **Install once** – When ready to deploy: `composer require laravel-scale/laravel-scale --dev` and `php artisan scale:install`.
-3. **Commit** – Commit `docker/`, `.dockerignore`, `config/octane.php`, and the `.gitignore` changes. Push to GitHub/GitLab.
+3. **Commit** – Commit `docker/`, `.dockerignore`, `app/Providers/ForceHttpsServiceProvider.php`, `bootstrap/providers.php`, `config/octane.php`, and the `.gitignore` changes. Push to GitHub/GitLab.
 4. **Stateless config** – In `.env.example` (and your platform’s env), set `SESSION_DRIVER=database`, `CACHE_STORE=database`, `QUEUE_CONNECTION=database`. Use S3 for uploads. Add Redis extension to Dockerfile if using Redis.
 5. **Platform** – Create a Web Service (Docker) and a Background Worker on Render (or similar). Point both at your repo. Set **Dockerfile Path** to `docker/Dockerfile` for each. Add a database (e.g. PostgreSQL on Render) and set env vars, deploy.
 6. **Iterate** – Push code; platform rebuilds from the repo. No `scale:install` in CI—everything is already in the repo.
