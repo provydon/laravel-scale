@@ -129,6 +129,8 @@ See **docker/README.md** (published into your app) for the full stateless checkl
 5. **Port**: set **Port** to **8000** (Octane listens on 8000).
 6. Save and deploy. Render will build the Docker image and start the web service.
 
+**Set `APP_URL` correctly.** Use either the URL your platform gives you (e.g. `https://myapp.onrender.com`) or your custom domain (e.g. `https://app.yourdomain.com`). If `APP_URL` is wrong, the app can load over HTTPS but request assets over HTTP. The browser will block those requests (Mixed Content), and the page will appear blank—e.g. *"The page at 'https://yoursite.onrender.com/login' was loaded over HTTPS, but requested an insecure resource 'http://yoursite.onrender.com/build/assets/...'. This request has been blocked."* Fix it by setting `APP_URL` to the exact public URL (including `https://`) in the Web Service environment variables, then redeploy.
+
 If **`npm run build` fails** (e.g. Vite/Wayfinder errors): add a Docker build argument **`SKIP_FRONTEND`** = **`1`** in the service’s Environment so the image builds without frontend assets. See **docker/README.md** for details.
 
 ### 2. Create a Worker Service (optional)
