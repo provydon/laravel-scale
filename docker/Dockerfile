@@ -12,6 +12,7 @@ RUN install-php-extensions \
     intl \
     opcache \
     pcntl \
+    pdo_mysql \
     pdo_pgsql \
     pdo_sqlite \
     zip
@@ -22,6 +23,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     unzip \
+    default-libmysqlclient-dev \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 

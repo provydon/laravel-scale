@@ -48,7 +48,7 @@ composer require provydon/laravel-scale --dev --with-all-dependencies
 php artisan scale:install
 ```
 
-Then commit `docker/`, `.dockerignore`, `app/Providers/ForceHttpsServiceProvider.php`, `bootstrap/providers.php`, and `config/octane.php`. Run `composer update` to pull the latest Octane and other dependencies.
+Then commit `docker/`, `.dockerignore`, `app/Providers/ForceHttpsServiceProvider.php`, `app/Http/Middleware/ForceHttpsMiddleware.php`, `bootstrap/providers.php`, `bootstrap/app.php`, and `config/octane.php`. Run `composer update` to pull the latest Octane and other dependencies.
 
 **When you upgrade the package** (e.g. `composer update provydon/laravel-scale --with-all-dependencies`), run `php artisan scale:install` again to publish the latest Docker files and fixes, then commit any changed files.
 
@@ -72,18 +72,21 @@ Options:
 1. **Octane in production**  
    `scale:install` adds or moves **`laravel/octane` into `require`** in your `composer.json` so the Docker image (which runs `composer install --no-dev`) gets Octane. The package is in `require-dev` so production’s `composer install --no-dev` won’t install it; the published files run in production.
 
-2. **Stateless setup**  
+2. **Database**  
+   The Docker image includes **MySQL**, **PostgreSQL**, and **SQLite** drivers by default (`pdo_mysql`, `pdo_pgsql`, `pdo_sqlite`). No need to edit the Dockerfile—set `DB_CONNECTION` and your DB_* env vars (e.g. on Render) and it works.
+
+3. **Stateless setup**  
    In Render (and `.env.example`), set:
    - **Session**: `SESSION_DRIVER=database` (or `redis`).
    - **Cache**: `CACHE_STORE=database` (or `redis`).
    - **Files**: `FILESYSTEM_DISK=s3` and AWS_* (or other external disk).
    - **Queue**: `QUEUE_CONNECTION=database` (or `redis`) for the worker service.
 
-3. **Docker**  
+4. **Docker**  
    - Web: build with `DEPLOYMENT_TYPE=web`, expose port **8000**.
    - Worker: same image with `DEPLOYMENT_TYPE=worker`, or build with `--build-arg DEPLOYMENT_TYPE=worker` for a smaller image.
 
-4. **Render**  
+5. **Render**  
    - Web: Docker service, build from repo, start command = container default (entrypoint), port 8000.
    - Worker: second Docker service, same image, `DEPLOYMENT_TYPE=worker`, no port.
 
@@ -94,16 +97,17 @@ You need **both** a web service and a **worker-scheduler** service (Background W
 - **Scheduler**: Running the scheduler (`schedule:work`) on a single dedicated worker avoids race conditions. If every web container ran the scheduler, multiple instances could trigger the same task at once (e.g. duplicate emails or cleanup jobs).
 - **Queue and HTTP**: Running `queue:work` and the scheduler on the worker keeps background work off the web processes. That way web containers stay focused on handling requests instead of being slowed or blocked by queued jobs and cron.
 
-See **docker/README.md** (published into your app) for the full stateless checklist, build commands, **PHP version** (how the image picks PHP 8.2–8.5 and how to pin a version), **database** (the image can use any Laravel-supported database—PostgreSQL, MySQL, SQLite, etc.; docker/README.md explains how to switch the PHP extension and driver), and **backend-only apps** (how to remove the Node/frontend stage if your app is API-only).
+See **docker/README.md** (published into your app) for the full stateless checklist, build commands, **PHP version** (how the image picks PHP 8.2–8.5 and how to pin a version), **database** (the image includes MySQL, PostgreSQL, and SQLite drivers by default—no Dockerfile edits needed), and **backend-only apps** (how to remove the Node/frontend stage if your app is API-only).
 
 ## What it does
 
 `scale:install` publishes into your app:
 
-- **docker/** — Dockerfile, entrypoint, `supervisord-web.conf` (Octane), `supervisord-worker.conf` (queue + scheduler), php.ini
+- **docker/** — Dockerfile (PHP + Node frontend stage; MySQL, PostgreSQL, SQLite drivers; PostCSS/Tailwind support), entrypoint, `supervisord-web.conf` (Octane), `supervisord-worker.conf` (queue + scheduler), php.ini
 - **.dockerignore** — keeps build context small
-- **app/Providers/ForceHttpsServiceProvider.php** — forces `https://` for URLs in non-local environments (so production works behind a reverse proxy without Mixed Content; the package is dev-only so this lives in your app)
-- **docker/README.md** — stateless checklist (session/cache in DB or Redis, files on S3), PHP version, database options, backend-only variant
+- **app/Providers/ForceHttpsServiceProvider.php** — forces `https://` for URLs in non-local environments (so production works behind a reverse proxy without Mixed Content)
+- **app/Http/Middleware/ForceHttpsMiddleware.php** — runs at the start of the web stack so asset/Vite URLs use `https://` (avoids blank or unstyled pages from Mixed Content)
+- **docker/README.md** — stateless checklist (session/cache in DB or Redis, files on S3), PHP version, database (all three drivers by default), backend-only variant
 
 **Requirements:** PHP ^8.2, Laravel ^11.0|^12.0, laravel/octane ^2.13 (FrankenPHP). Run `composer update` in your app to pull compatible versions.
 
@@ -162,7 +166,7 @@ Render injects some vars automatically (e.g. `RENDER_EXTERNAL_URL`, `RENDER_INST
 
 ### 4. Database
 
-Use any database Laravel supports (PostgreSQL, MySQL, SQLite, etc.). Set `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` in your Web and Worker services. On Render, you can create a PostgreSQL instance (Dashboard → New + → PostgreSQL) and add its **Internal Database URL** or individual vars. The Docker image includes `pdo_pgsql` by default; see **docker/README.md** to use MySQL, SQLite, or another driver.
+Use any database Laravel supports: **PostgreSQL**, **MySQL**, or **SQLite**. The Docker image includes all three drivers by default (`pdo_mysql`, `pdo_pgsql`, `pdo_sqlite`)—no Dockerfile edits needed. Set `DB_CONNECTION` and the usual `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` in your Web and Worker services. On Render, create a PostgreSQL or MySQL instance (or use SQLite for a single instance) and add its connection vars.
 
 ### 5. Redis or key-value cache (optional)
 
@@ -180,7 +184,7 @@ Use **your own domain or subdomain** for the app instead of the platform’s def
 
 1. **Local setup** – Create your Laravel app, develop as usual (Blade, Inertia, API, etc.).
 2. **Install once** – When ready to deploy: `composer require provydon/laravel-scale --dev --with-all-dependencies` and `php artisan scale:install`.
-3. **Commit** – Commit `docker/`, `.dockerignore`, `app/Providers/ForceHttpsServiceProvider.php`, `bootstrap/providers.php`, `config/octane.php`, and the `.gitignore` changes. Push to GitHub/GitLab.
+3. **Commit** – Commit `docker/`, `.dockerignore`, `app/Providers/ForceHttpsServiceProvider.php`, `app/Http/Middleware/ForceHttpsMiddleware.php`, `bootstrap/providers.php`, `bootstrap/app.php`, `config/octane.php`, and the `.gitignore` changes. Push to GitHub/GitLab.
 4. **Stateless config** – In `.env.example` (and your platform’s env), set `SESSION_DRIVER=database`, `CACHE_STORE=database`, `QUEUE_CONNECTION=database`. Use S3 for uploads. Add Redis extension to Dockerfile if using Redis.
 5. **Platform** – Create a Web Service (Docker) and a Background Worker on Render (or similar). Point both at your repo. Set **Dockerfile Path** to `docker/Dockerfile` for each. Add a database (e.g. PostgreSQL on Render) and set env vars, deploy.
 6. **Iterate** – Push code; platform rebuilds from the repo. No `scale:install` in CI—everything is already in the repo.

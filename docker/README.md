@@ -2,7 +2,7 @@
 
 This folder is published by **Laravel Scale** (`provydon/laravel-scale`). It’s the Docker and process layout that sets up most Laravel apps to scale (web + worker-scheduler, stateless). It contains:
 
-- **Dockerfile** – Multi-stage build: Node frontend, then PHP (FrankenPHP) + Supervisor
+- **Dockerfile** – Multi-stage build: Node frontend (Vite, Tailwind/PostCSS), then PHP (FrankenPHP) + Supervisor. Includes MySQL, PostgreSQL, and SQLite drivers by default.
 - **docker-entrypoint.sh** – Builds `.env` from `.env.example` + Render env, runs migrations (web), starts Supervisor
 - **supervisord-web.conf** – Octane (FrankenPHP) on port 8000
 - **supervisord-worker.conf** – `queue:work` + `schedule:work`
@@ -32,7 +32,15 @@ docker run --rm dunglas/frankenphp php -v
 
 ## Database
 
-The Dockerfile includes `pdo_pgsql` and `pdo_sqlite` by default. Use SQLite (`DB_CONNECTION=sqlite`) for quick local Docker testing without a database server. For production, use PostgreSQL—most autoscaling platforms (Render, Fly.io, Railway, etc.) offer it as a managed service. To use MySQL instead, replace `pdo_pgsql` with `pdo_mysql` (and `mysqli` if needed) in the `install-php-extensions` block.
+The Docker image includes **all three** Laravel database drivers by default:
+
+| Driver       | PHP extension  | Use case                          |
+|-------------|-----------------|-----------------------------------|
+| MySQL       | `pdo_mysql`     | `DB_CONNECTION=mysql`             |
+| PostgreSQL  | `pdo_pgsql`     | `DB_CONNECTION=pgsql`             |
+| SQLite      | `pdo_sqlite`     | `DB_CONNECTION=sqlite`            |
+
+No Dockerfile edits are required. Set `DB_CONNECTION` and the usual `DB_*` env vars (e.g. on Render) and it works. Use SQLite for quick local testing; use PostgreSQL or MySQL (managed on Render, Fly.io, Railway, etc.) for production.
 
 ## Deployment types (Render)
 
@@ -134,6 +142,10 @@ PUSHER_APP_CLUSTER=...
 
 If you use **Laravel Wayfinder**, `scale:install` automatically removes the Wayfinder Vite plugin from `vite.config.*` (so the Docker frontend stage doesn't run PHP) and ensures `resources/js/routes/`, `resources/js/actions/`, and `resources/js/wayfinder/` are committed. Run **`php artisan wayfinder:generate`** locally after install, then commit the generated files. The image will then build without Wayfinder errors.
 
+## Frontend build (Vite + Tailwind)
+
+The frontend stage copies `vite.config.*`, `tailwind.config.*`, and **`postcss.config.*`** so that PostCSS and Tailwind run during `npm run build`. If your app uses Tailwind, ensure you have a root-level `postcss.config.js` (or `postcss.config.cjs`); the default Laravel + Vite + Tailwind setup already includes it. Without it, the built CSS can be empty or missing utility classes.
+
 ## If `npm run build` fails (other causes)
 
 If the frontend build still fails (e.g. missing env, other plugins), you can skip it and deploy without assets:
@@ -163,6 +175,6 @@ The Dockerfile comments mark these sections. After removal, the image will build
 
 1. **Web Service**: New → Web Service → connect repo → Environment: **Docker**. Set **Dockerfile Path** to **`docker/Dockerfile`** (required; in Advanced if not visible). **Port**: **8000**. Env: `DEPLOYMENT_TYPE=web`, `APP_KEY`, DB_*, and stateless vars (`SESSION_DRIVER=database`, `CACHE_STORE=database`, etc.). Leave **Start Command** empty so the image entrypoint runs.
 2. **Worker**: New → Background Worker → same repo, Docker. Env: `DEPLOYMENT_TYPE=worker` and same DB/Redis/APP_KEY as web. Optional: build with `--build-arg DEPLOYMENT_TYPE=worker` for a smaller image.
-3. Add a **PostgreSQL** instance in Render and attach its URL to both services. Prefer a **custom domain** (e.g. `app.yourdomain.com`) over the platform default (`*.onrender.com`) and set **`APP_URL`** to the exact URL your app’s DNS points to—with a load balancer, `APP_URL` must match the public URL or links, redirects, and assets can break.
+3. Add a **PostgreSQL** (or MySQL) instance in Render and attach its URL to both services—or use SQLite for a single instance. The image supports all three out of the box. Prefer a **custom domain** (e.g. `app.yourdomain.com`) over the platform default (`*.onrender.com`) and set **`APP_URL`** to the exact URL your app’s DNS points to—with a load balancer, `APP_URL` must match the public URL or links, redirects, and assets can break.
 
 See the package **README.md** for full step-by-step Render deployment instructions.
