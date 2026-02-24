@@ -2,7 +2,7 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/laravel-scale/laravel-scale.svg?style=flat-square)](https://packagist.org/packages/laravel-scale/laravel-scale)
 
-Scale your Laravel app with one install: **Laravel Octane (FrankenPHP)**, a production-ready Docker setup, and a stateless web + worker layout that runs on Render, Laravel Cloud, Fly.io, Railway, and other container platforms.
+Scale your Laravel app with one install: it comes with **Laravel Octane (FrankenPHP)**, a production-ready Docker setup, and a stateless web + worker layout that runs on Render, Laravel Cloud, Fly.io, Railway, and other container platforms.
 
 ---
 
