@@ -2,7 +2,7 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/laravel-scale/laravel-scale.svg?style=flat-square)](https://packagist.org/packages/laravel-scale/laravel-scale)
 
-Scale your Laravel app with one install: **Laravel Octane (FrankenPHP)**, a production-ready Docker setup, and a stateless web + worker layout that runs on Render, Fly.io, Railway, and other container platforms.
+Scale your Laravel app with one install: **Laravel Octane (FrankenPHP)**, a production-ready Docker setup, and a stateless web + worker layout that runs on Render, Laravel Cloud, Fly.io, Railway, and other container platforms.
 
 **Why you need this:** A traditional Laravel deployment runs a single PHP process on the server (e.g. `php artisan serve` or one PHP-FPM worker). When your app gets 100,000 requests in a minute, they all queue up to that one process—bottleneck, timeouts, and a bad experience. Users at the bottom of that queue experience slow or failing requests.
 
@@ -31,7 +31,7 @@ This package gives you that setup in one command: Octane for high-concurrency HT
 
 ## Install
 
-Run `scale:install` **once** from your local machine. The published files become part of your repo—commit them and push. CI and deployment platforms (Render, Fly.io, etc.) build from the repo; they do not run `scale:install` again.
+Run `scale:install` **once** from your local machine. The published files become part of your repo—commit them and push. CI and deployment platforms (Render, Laravel Cloud, Fly.io, etc.) build from the repo; they do not run `scale:install` again.
 
 **From [Packagist](https://packagist.org/packages/laravel-scale/laravel-scale):**
 
