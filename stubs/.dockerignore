@@ -1,0 +1,54 @@
+# Dependencies (reinstalled in container)
+/node_modules
+/vendor
+
+# Git and IDE
+.git
+.gitignore
+.gitattributes
+.idea
+.vscode
+*.swp
+*.swo
+
+# Env and secrets (Render injects env at runtime)
+.env
+.env.*
+!.env.example
+
+# Build and logs
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/bootstrap/cache/*
+/bootstrap/ssr
+/public/hot
+/public/storage
+
+# Tests and dev
+/tests
+/phpunit.xml
+.phpunit.cache
+.phpunit.result.cache
+coverage*
+.pest
+
+# Docs and misc
+*.md
+!docker/README.md
+.DS_Store
+Thumbs.db
+
+# Docker (avoid recursive copy)
+Dockerfile*
+docker-compose*
+.docker
+
+# Frontend build (rebuilt in container)
+/public/build
+
+# Octane/FrankenPHP runtime (generated locally, not needed in image)
+frankenphp
+frankenphp-worker.php
+**/caddy
