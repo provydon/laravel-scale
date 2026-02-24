@@ -25,10 +25,19 @@ class ForceHttpsServiceProvider extends ServiceProvider
             return;
         }
         $appUrl = config('app.url', '');
-        // Force HTTPS in production, or whenever APP_URL is https (e.g. prod with APP_ENV=local set by mistake)
-        if ($this->app->environment('local') && ! str_starts_with($appUrl, 'https://')) {
-            return;
+        try {
+            $host = $this->app->make('request')->getHost();
+        } catch (\Throwable) {
+            $host = '';
         }
-        URL::forceScheme('https');
+        // Force HTTPS for known production domains (Render, Fly, Railway) even if APP_ENV/APP_URL are wrong
+        $productionDomains = ['onrender.com', 'fly.dev', 'railway.app', 'up.railway.app'];
+        $isProductionDomain = $host && array_filter($productionDomains, fn ($d) => str_ends_with($host, $d)) !== [];
+        $shouldForce = $isProductionDomain
+            || ! $this->app->environment('local')
+            || str_starts_with($appUrl, 'https://');
+        if ($shouldForce) {
+            URL::forceScheme('https');
+        }
     }
 }

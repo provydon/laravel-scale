@@ -76,7 +76,7 @@ class InstallCommand extends Command
 
         $insert = "        \$middleware->trustProxies(at: '*');\n        \$middleware->statefulApi();\n\n";
         $pattern = '/(->withMiddleware\s*\(function\s*\([^)]+\)[^{]*\{\s*\n)/';
-        $contents = preg_replace($pattern, '$1' . $insert, $contents, 1);
+        $contents = preg_replace($pattern, '$1'.$insert, $contents, 1);
 
         if ($contents !== null) {
             file_put_contents($path, $contents);
@@ -105,7 +105,7 @@ class InstallCommand extends Command
         // Append to the providers array (before the closing ];)
         $contents = preg_replace(
             '/(\n)(\s*)\];\s*$/',
-            '$1$2    ' . $providerClass . ",\n$2];",
+            '$1$2    '.$providerClass.",\n$2];",
             $contents,
             1
         );
@@ -144,7 +144,7 @@ class InstallCommand extends Command
         $json['require'] = $require;
         ksort($json['require']);
 
-        file_put_contents($path, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+        file_put_contents($path, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n");
 
         $this->info('Ensuring laravel/octane is in require (needed for production Docker image)...');
         Process::path(base_path())->run('composer update laravel/octane --no-interaction');
@@ -277,7 +277,7 @@ class InstallCommand extends Command
                     ksort($json['dependencies']);
                     file_put_contents(
                         $packagePath,
-                        json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n"
+                        json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n"
                     );
                     $this->info('Added ziggy-js to package.json dependencies. Run npm install.');
                 }
@@ -299,12 +299,13 @@ class InstallCommand extends Command
 
         if (str_contains($contents, self::GITIGNORE_MARKER)) {
             if ($usesWayfinder && ! str_contains($contents, self::GITIGNORE_WAYFINDER_MARKER)) {
-                $contents .= "\n" . self::GITIGNORE_WAYFINDER_MARKER . " - commit generated routes/actions/wayfinder\n"
-                    . "!resources/js/routes/\n"
-                    . "!resources/js/actions/\n"
-                    . "!resources/js/wayfinder/\n";
+                $contents .= "\n".self::GITIGNORE_WAYFINDER_MARKER." - commit generated routes/actions/wayfinder\n"
+                    ."!resources/js/routes/\n"
+                    ."!resources/js/actions/\n"
+                    ."!resources/js/wayfinder/\n";
                 file_put_contents($path, $contents);
             }
+
             return;
         }
 
@@ -313,16 +314,16 @@ class InstallCommand extends Command
             ? "!resources/js/routes/\n!resources/js/actions/\n!resources/js/wayfinder/\n"
             : '';
 
-        $block = "\n" . self::GITIGNORE_MARKER . " - ensure these are committed (un-ignore if needed)\n"
-            . "!docker/\n"
-            . $octaneLine
-            . $wayfinderLines
-            . "\n"
-            . self::GITIGNORE_MARKER . " - runtime-generated (do not commit)\n"
-            . "frankenphp\n"
-            . "frankenphp-worker.php\n"
-            . "**/caddy\n";
+        $block = "\n".self::GITIGNORE_MARKER." - ensure these are committed (un-ignore if needed)\n"
+            ."!docker/\n"
+            .$octaneLine
+            .$wayfinderLines
+            ."\n"
+            .self::GITIGNORE_MARKER." - runtime-generated (do not commit)\n"
+            ."frankenphp\n"
+            ."frankenphp-worker.php\n"
+            ."**/caddy\n";
 
-        file_put_contents($path, $contents . $block);
+        file_put_contents($path, $contents.$block);
     }
 }
