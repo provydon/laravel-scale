@@ -22,7 +22,6 @@ This package gives you that setup in one command: Octane for high-concurrency HT
 
 ## Contents
 
-- [Why you need this](#why-you-need-this)
 - [Install](#install)
 - [After install](#after-install)
 - [What it does](#what-it-does)
