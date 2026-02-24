@@ -1,6 +1,6 @@
 # Docker + Octane (FrankenPHP) for Render
 
-This folder is published by **Laravel Scale** (`laravel-scale/laravel-scale`). It’s the Docker and process layout that sets up most Laravel apps to scale (web + worker-scheduler, stateless). It contains:
+This folder is published by **Laravel Scale** (`provydon/laravel-scale`). It’s the Docker and process layout that sets up most Laravel apps to scale (web + worker-scheduler, stateless). It contains:
 
 - **Dockerfile** – Multi-stage build: Node frontend, then PHP (FrankenPHP) + Supervisor
 - **docker-entrypoint.sh** – Builds `.env` from `.env.example` + Render env, runs migrations (web), starts Supervisor

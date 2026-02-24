@@ -1,5 +1,5 @@
 {
-  "name": "laravel-scale/laravel-scale",
+  "name": "provydon/laravel-scale",
   "description": "Scale your Laravel app. A set of libraries: Laravel Octane (FrankenPHP), Docker, and a stateless web + worker setup for Render, Fly.io, Railway.",
   "type": "library",
   "license": "MIT",
@@ -30,5 +30,5 @@
     }
   },
   "minimum-stability": "stable",
-  "version": "1.4.0"
+  "version": "1.5.0"
 }
