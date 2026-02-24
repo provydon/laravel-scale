@@ -14,9 +14,9 @@ Scale your Laravel app with one install: **Laravel Octane (FrankenPHP)**, a prod
 
 ## Contents
 
-- [What it does](#what-it-does)
 - [Install](#install)
 - [After install](#after-install)
+- [What it does](#what-it-does)
 - [Deploying on Render.com](#deploying-on-rendercom)
 - [Typical dev journey](#typical-dev-journey)
 - [Local development](#local-development)
@@ -24,15 +24,6 @@ Scale your Laravel app with one install: **Laravel Octane (FrankenPHP)**, a prod
 - [Support](#support)
 
 ---
-
-## What it does
-
-- **Octane (FrankenPHP)** for high-concurrency HTTP; a **single Docker image** runs as web or worker via `DEPLOYMENT_TYPE`; **Supervisor** runs Octane, queue, and scheduler in one container.
-- **Stateless by design** — guidance for session, cache, and file storage (DB/Redis, S3) so your app scales horizontally across instances.
-- Requires **PHP ^8.2**, **Laravel ^11.0|^12.0**, and **laravel/octane ^2.13**. Run `composer update` in your app to use the latest compatible versions.
-- Publishes a **docker/** folder: Dockerfile, entrypoint, **supervisord-web.conf** (Octane) and **supervisord-worker.conf** (queue + scheduler), php.ini.
-- Publishes a **.dockerignore** to keep build context small and fast.
-- **README** in `docker/` explains how to make the app stateless: session and cache in DB (or Redis), files on S3 (or other external storage).
 
 ## Install
 
@@ -90,6 +81,16 @@ You need **both** a web service and a **worker-scheduler** service (Background W
 - **Queue and HTTP**: Running `queue:work` and the scheduler on the worker keeps background work off the web processes. That way web containers stay focused on handling requests instead of being slowed or blocked by queued jobs and cron.
 
 See **docker/README.md** (published into your app) for the full stateless checklist, build commands, **PHP version** (how the image picks PHP 8.2–8.5 and how to pin a version), **database** (how to switch `pdo_pgsql` to MySQL or SQLite; we default to PostgreSQL because most autoscaling platforms use it), and **backend-only apps** (how to remove the Node/frontend stage if your app is API-only).
+
+## What it does
+
+`scale:install` publishes into your app:
+
+- **docker/** — Dockerfile, entrypoint, `supervisord-web.conf` (Octane), `supervisord-worker.conf` (queue + scheduler), php.ini
+- **.dockerignore** — keeps build context small
+- **docker/README.md** — stateless checklist (session/cache in DB or Redis, files on S3), PHP version, database options, backend-only variant
+
+**Requirements:** PHP ^8.2, Laravel ^11.0|^12.0, laravel/octane ^2.13 (FrankenPHP). Run `composer update` in your app to pull compatible versions.
 
 ## Deploying on Render.com
 
