@@ -56,8 +56,11 @@ class InstallCommand extends Command
         $this->info('Registering ForceHttpsServiceProvider so production uses https:// without the package installed...');
         $this->ensureForceHttpsProviderRegistered();
 
+        $this->info('Registering ForceHttpsMiddleware at start of web stack so asset URLs use https...');
+        $this->ensureForceHttpsMiddlewareRegistered();
+
         $this->newLine();
-        $this->info('Done. Commit docker/, .dockerignore, app/Providers/ForceHttpsServiceProvider.php, bootstrap/providers.php, and config/octane.php to your repo. Ensure your app is stateless: session and cache in DB (or Redis), files on S3/external. See README in docker/.');
+        $this->info('Done. Commit docker/, .dockerignore, app/Providers/ForceHttpsServiceProvider.php, app/Http/Middleware/ForceHttpsMiddleware.php, bootstrap/providers.php, bootstrap/app.php, and config/octane.php to your repo. Ensure your app is stateless: session and cache in DB (or Redis), files on S3/external. See README in docker/.');
 
         return self::SUCCESS;
     }
@@ -112,6 +115,43 @@ class InstallCommand extends Command
 
         if ($contents !== null) {
             file_put_contents($providersPath, $contents);
+        }
+    }
+
+    private function ensureForceHttpsMiddlewareRegistered(): void
+    {
+        $middlewarePath = base_path('app/Http/Middleware/ForceHttpsMiddleware.php');
+        if (! file_exists($middlewarePath)) {
+            return;
+        }
+
+        $path = base_path('bootstrap/app.php');
+        if (! file_exists($path)) {
+            return;
+        }
+
+        $contents = file_get_contents($path);
+        if (str_contains($contents, 'ForceHttpsMiddleware')) {
+            return;
+        }
+
+        $insert = "\n        \$middleware->web(prepend: [\\App\\Http\\Middleware\\ForceHttpsMiddleware::class]);";
+        $replaced = preg_replace(
+            '/(\$middleware->statefulApi\(\);\s*\n)/',
+            '$1'.$insert."\n",
+            $contents,
+            1
+        );
+        if ($replaced === $contents) {
+            $replaced = preg_replace(
+                '/(\$middleware->trustProxies\([^)]*\);\s*\n)/',
+                '$1'.$insert."\n",
+                $contents,
+                1
+            );
+        }
+        if ($replaced !== null && $replaced !== $contents) {
+            file_put_contents($path, $replaced);
         }
     }
 

@@ -17,6 +17,7 @@ class LaravelScaleServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../docker' => base_path('docker'),
                 __DIR__.'/../stubs/ForceHttpsServiceProvider.php' => base_path('app/Providers/ForceHttpsServiceProvider.php'),
+                __DIR__.'/../stubs/ForceHttpsMiddleware.php' => base_path('app/Http/Middleware/ForceHttpsMiddleware.php'),
             ], 'laravel-scale');
 
             $this->publishes([

@@ -23,6 +23,11 @@ class InstallCommandTest extends TestCase
         $providersPath = base_path('bootstrap/providers.php');
         $this->assertFileExists($providersPath);
         $this->assertStringContainsString('ForceHttpsServiceProvider', file_get_contents($providersPath));
+
+        $middlewarePath = base_path('app/Http/Middleware/ForceHttpsMiddleware.php');
+        $this->assertFileExists($middlewarePath);
+        $this->assertStringContainsString('URL::forceScheme', file_get_contents($middlewarePath));
+        // Middleware is registered in bootstrap/app.php when it contains statefulApi()/trustProxies (see ensureForceHttpsMiddlewareRegistered)
     }
 
     public function test_scale_install_publishes_docker_directory(): void
