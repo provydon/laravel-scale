@@ -20,6 +20,7 @@ Scale your Laravel app with one install: **Laravel Octane (FrankenPHP)**, a prod
 - [Deploying on Render.com](#deploying-on-rendercom)
 - [Typical dev journey](#typical-dev-journey)
 - [Local development](#local-development)
+- [Contributing (install from local path)](#contributing-install-from-local-path)
 - [Support](#support)
 
 ---
@@ -43,19 +44,6 @@ php artisan scale:install
 ```
 
 Then commit `docker/`, `.dockerignore`, and `config/octane.php` (if Octane was installed). Production builds use `composer install --no-dev`, so the package is not shipped in the image. Run `composer update` to pull the latest Octane and other dependencies.
-
-**From a local path** (when developing this package), in your Laravel app’s `composer.json`:
-
-```json
-"repositories": [
-  { "type": "path", "url": "/path/to/laravel-scale" }
-],
-"require-dev": {
-  "laravel-scale/laravel-scale": "@dev"
-}
-```
-
-Then `composer update laravel-scale/laravel-scale` and `php artisan scale:install`.
 
 This will:
 
@@ -188,6 +176,21 @@ php artisan octane:start --server=frankenphp
 ```
 
 Or your existing `composer dev` / `npm run dev` setup; the package only adds Docker and publishables for deployment.
+
+## Contributing (install from local path)
+
+If you’re developing this package or want to try it from a local clone, in your Laravel app’s `composer.json` add:
+
+```json
+"repositories": [
+  { "type": "path", "url": "/path/to/laravel-scale" }
+],
+"require-dev": {
+  "laravel-scale/laravel-scale": "@dev"
+}
+```
+
+Then run `composer update laravel-scale/laravel-scale` and `php artisan scale:install`.
 
 ## Support
 
