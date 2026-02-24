@@ -73,7 +73,7 @@ Options:
    `scale:install` adds or moves **`laravel/octane` into `require`** in your `composer.json` so the Docker image (which runs `composer install --no-dev`) gets Octane. The package is in `require-dev` so production’s `composer install --no-dev` won’t install it; the published files run in production.
 
 2. **Database**  
-   The Docker image includes **MySQL**, **PostgreSQL**, and **SQLite** drivers by default (`pdo_mysql`, `pdo_pgsql`, `pdo_sqlite`). No need to edit the Dockerfile—set `DB_CONNECTION` and your DB_* env vars (e.g. on Render) and it works. **Ensure your database is reachable from your containers:** if it runs on a separate host (e.g. managed DB on Render, Fly, or your own server), the DB must accept connections from the internet or your platform’s network, with the right port open (e.g. **3306** for MySQL, **5432** for PostgreSQL). On Render, attaching a managed PostgreSQL/MySQL instance does this for you.
+   The Docker image includes **MySQL**, **PostgreSQL**, and **SQLite** drivers by default (`pdo_mysql`, `pdo_pgsql`, `pdo_sqlite`). Set `DB_CONNECTION` and your DB_* env vars (e.g. on Render) and it works. **See the “Database” section under *Deploying on Render* below** for essential requirements: your database must be reachable from your containers (correct ports open) and the DB user must have access to the database.
 
 3. **Stateless setup**  
    In Render (and `.env.example`), set:
@@ -166,9 +166,19 @@ Render injects some vars automatically (e.g. `RENDER_EXTERNAL_URL`, `RENDER_INST
 
 ### 4. Database
 
-Use any database Laravel supports: **PostgreSQL**, **MySQL**, or **SQLite**. The Docker image includes all three drivers by default (`pdo_mysql`, `pdo_pgsql`, `pdo_sqlite`)—no Dockerfile edits needed. Set `DB_CONNECTION` and the usual `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` in your Web and Worker services. On Render, create a PostgreSQL or MySQL instance (or use SQLite for a single instance) and add its connection vars.
+Use any database Laravel supports: **PostgreSQL**, **MySQL**, or **SQLite**. The Docker image includes all three drivers by default—no Dockerfile edits needed. Set `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` in your Web and Worker services. On Render, create a PostgreSQL or MySQL instance (or use SQLite for a single instance) and add its connection vars.
 
-**Make sure your database is accessible from your containers.** If the DB runs on another host (managed service or your own server), it must accept connections from the internet or your platform’s private network, with the correct port open: **3306** (MySQL), **5432** (PostgreSQL). Render’s managed PostgreSQL/MySQL are reachable by default when attached to your service; self-hosted or external DBs may require firewall/security-group rules (e.g. allow your platform’s outbound IPs or use a private network).
+> **Important: make your database reachable and grant access**
+>
+> Your app runs inside containers. For migrations and normal requests to work, two things must be true.
+>
+> **1. The database must be reachable from your containers.**  
+> If the DB runs on a separate host (managed service or your own server), it has to accept connections from the internet or your platform’s private network. The right **port must be open**: **3306** for MySQL, **5432** for PostgreSQL. On Render, attaching a managed PostgreSQL or MySQL instance does this for you. For a self-hosted or external DB, open that port in the firewall and allow your platform’s outbound IPs (or put the DB and app on a private network).
+>
+> **2. The database user must have access to the database.**  
+> The user in `DB_USERNAME` must be allowed to connect to the host and must have privileges on the database named in `DB_DATABASE` (e.g. `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and for migrations `CREATE`, `ALTER`, etc.). On managed services this is usually set when you create the DB and user; on your own server, grant the user access to the database and ensure it can connect from the app’s network.
+>
+> **If the container fails to start or you see "No open ports":** Check the deploy logs. The entrypoint runs migrations and other steps before starting the web server; if **migration fails** or another step fails, the container exits and no port is opened. The entrypoint prints a clear error (e.g. "ERROR: Migration failed…") and a short hint on common causes (database not reachable, DB user has no access, missing env vars). Fix the cause (open port 3306/5432, grant the user access to the database, or set APP_KEY and DB_*), then redeploy.
 
 ### 5. Redis or key-value cache (optional)
 

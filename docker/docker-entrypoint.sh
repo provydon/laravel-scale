@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+# On any exit due to error, print a hint (set -e will have already printed the failing command's output).
+trap 'if [ $? -ne 0 ]; then echo "--- Entrypoint failed. Check logs above. Common causes: database not reachable (open port 3306 or 5432), DB user has no access to the database, or missing env vars (APP_KEY, DB_*). ---"; fi' EXIT
+
 cd /app
 
 # Build .env from .env.example + env vars (Render injects env)
@@ -35,7 +38,10 @@ if [ "$DEPLOYMENT_TYPE" = "worker" ]; then
     exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord-worker.conf
 else
     echo "Starting web deployment..."
-    php artisan migrate --force
+    php artisan migrate --force || {
+        echo "ERROR: Migration failed. Check that your database is reachable from this container (port 3306 for MySQL, 5432 for PostgreSQL) and that DB_USERNAME has access to DB_DATABASE."
+        exit 1
+    }
     php artisan config:clear
     php artisan cache:clear
     php artisan config:cache

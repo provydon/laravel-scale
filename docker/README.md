@@ -42,7 +42,19 @@ The Docker image includes **all three** Laravel database drivers by default:
 
 No Dockerfile edits are required. Set `DB_CONNECTION` and the usual `DB_*` env vars (e.g. on Render) and it works. Use SQLite for quick local testing; use PostgreSQL or MySQL (managed on Render, Fly.io, Railway, etc.) for production.
 
-**Ensure your database is reachable from your containers.** If the DB is on a separate host, it must accept connections from the internet or your platform’s network with the right port open: **3306** (MySQL), **5432** (PostgreSQL). Managed DBs (e.g. Render, Fly, Railway) are typically reachable when attached to your service; for self-hosted or external DBs, open the port in the firewall and allow your app’s outbound IPs (or use a private network).
+---
+
+> **Important: database must be reachable and the user must have access**
+>
+> Your app runs in containers. For migrations and the app to work, both of the following must be true.
+>
+> **1. The database must be reachable from your containers.**  
+> If the DB is on another host (managed service or your own server), it must accept connections from the internet or your platform's network. The correct **port must be open**: **3306** for MySQL, **5432** for PostgreSQL. Managed DBs (Render, Fly, Railway, etc.) are usually reachable when attached to your service. For self-hosted or external DBs, open that port in the firewall and allow your app's outbound IPs (or use a private network).
+>
+> **2. The database user must have access to the database.**  
+> The user in `DB_USERNAME` must be allowed to connect to the DB host and must have the right privileges on the database in `DB_DATABASE` (e.g. `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and for migrations `CREATE`, `ALTER`). On managed services this is normally set when you create the DB and user; on your own server, grant the user access to the database and ensure it can connect from the app's network.
+>
+> **If the container fails to start or you see “No open ports”:** Check the deploy logs. The entrypoint (`docker-entrypoint.sh`) runs migrations and other steps before starting Octane. If **migration fails** or another step fails, the script exits and no port is opened. The entrypoint prints a clear error (e.g. “ERROR: Migration failed…”) and a hint with common causes (database not reachable, DB user has no access, missing env vars). Fix the cause and redeploy.
 
 ## Deployment types (Render)
 
