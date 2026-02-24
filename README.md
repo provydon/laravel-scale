@@ -4,7 +4,11 @@
 
 Scale your Laravel app with one install: **Laravel Octane (FrankenPHP)**, a production-ready Docker setup, and a stateless web + worker layout that runs on Render, Fly.io, Railway, and other container platforms.
 
-**Why you need this:** A traditional Laravel deployment runs a single PHP process on the server (e.g. `php artisan serve` or one PHP-FPM worker). When your app gets 100,000 requests in a minute, they all queue up to that one process—bottleneck, timeouts, and a bad experience. With Laravel Scale, your app is containerized with Docker and can replicate into 10, 50, or 100+ instances automatically (autoscale). The deployment platform’s load balancer spreads those 100k requests across the running containers, so you handle the traffic efficiently instead of overloading a single process. This package gives you that setup in one command: Octane for high-concurrency HTTP, a web + worker layout, and the stateless config (session, cache, files) so multiple instances work together instead of fighting each other.
+**Why you need this:** A traditional Laravel deployment runs a single PHP process on the server (e.g. `php artisan serve` or one PHP-FPM worker). When your app gets 100,000 requests in a minute, they all queue up to that one process—bottleneck, timeouts, and a bad experience. Users at the bottom of that queue experience slow or failing requests.
+
+With Laravel Scale, your app is containerized with Docker and can replicate into 10, 50, or 100+ instances automatically (autoscale). The deployment platform’s load balancer spreads those 100k requests across the running containers. For example, with 100 instances that’s about 1,000 requests per instance—all of them process fast for users instead of piling up on a single process.
+
+This package gives you that setup in one command: Octane for high-concurrency HTTP, a web + worker layout, and the stateless config (session, cache, files) so multiple instances work together instead of fighting each other.
 
 ---
 
