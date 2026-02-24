@@ -2,9 +2,27 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/laravel-scale/laravel-scale.svg?style=flat-square)](https://packagist.org/packages/laravel-scale/laravel-scale)
 
-Scale your Laravel app. A set of libraries—one install gives you Laravel Octane (FrankenPHP), a production Docker setup, and a stateless web + worker layout that runs on Render, Fly.io, Railway, and other container platforms.
+Scale your Laravel app with one install: **Laravel Octane (FrankenPHP)**, a production-ready Docker setup, and a stateless web + worker layout that runs on Render, Fly.io, Railway, and other container platforms.
 
-**Tech details:** Octane for high-concurrency HTTP, a single Docker image (web or worker via `DEPLOYMENT_TYPE`), supervisor for Octane + queue + scheduler, and guidance for stateless session, cache, and file storage so your app scales horizontally.
+**Under the hood:** Octane for high-concurrency HTTP, a single Docker image (web or worker via `DEPLOYMENT_TYPE`), Supervisor for Octane + queue + scheduler, and guidance for stateless session, cache, and file storage so your app scales horizontally.
+
+---
+
+[![Buy me a coffee](https://img.shields.io/badge/Buy_me_a_coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/provydon)
+
+---
+
+## Contents
+
+- [What it does](#what-it-does)
+- [Install](#install)
+- [After install](#after-install)
+- [Deploying on Render.com](#deploying-on-rendercom)
+- [Typical dev journey](#typical-dev-journey)
+- [Local development](#local-development)
+- [Support](#support)
+
+---
 
 ## What it does
 
@@ -173,7 +191,7 @@ Or your existing `composer dev` / `npm run dev` setup; the package only adds Doc
 
 ## Support
 
-<a href="https://buymeacoffee.com/provydon" target="_blank" rel="noopener noreferrer">Buy me a coffee</a>
+Enjoying Laravel Scale? [Buy me a coffee](https://buymeacoffee.com/provydon) — it helps keep this project maintained.
 
 ## License
 
