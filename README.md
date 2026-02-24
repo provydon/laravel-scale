@@ -4,7 +4,7 @@
 
 Scale your Laravel app with one install: **Laravel Octane (FrankenPHP)**, a production-ready Docker setup, and a stateless web + worker layout that runs on Render, Fly.io, Railway, and other container platforms.
 
-**Under the hood:** Octane for high-concurrency HTTP, a single Docker image (web or worker via `DEPLOYMENT_TYPE`), Supervisor for Octane + queue + scheduler, and guidance for stateless session, cache, and file storage so your app scales horizontally.
+**Why you need this:** A traditional Laravel deployment runs a single PHP process on the server (e.g. `php artisan serve` or one PHP-FPM worker). When your app gets 100,000 requests in a minute, they all queue up to that one process—bottleneck, timeouts, and a bad experience. With Laravel Scale, your app is containerized with Docker and can replicate into 10, 50, or 100+ instances automatically (autoscale). The deployment platform’s load balancer spreads those 100k requests across the running containers, so you handle the traffic efficiently instead of overloading a single process. This package gives you that setup in one command: Octane for high-concurrency HTTP, a web + worker layout, and the stateless config (session, cache, files) so multiple instances work together instead of fighting each other.
 
 ---
 
@@ -27,7 +27,9 @@ Scale your Laravel app with one install: **Laravel Octane (FrankenPHP)**, a prod
 
 ## What it does
 
-- Requires **PHP ^8.2**, **Laravel ^11.0|^12.0**, and **laravel/octane ^2.13** (FrankenPHP). Run `composer update` in your app to use the latest compatible versions.
+- **Octane (FrankenPHP)** for high-concurrency HTTP; a **single Docker image** runs as web or worker via `DEPLOYMENT_TYPE`; **Supervisor** runs Octane, queue, and scheduler in one container.
+- **Stateless by design** — guidance for session, cache, and file storage (DB/Redis, S3) so your app scales horizontally across instances.
+- Requires **PHP ^8.2**, **Laravel ^11.0|^12.0**, and **laravel/octane ^2.13**. Run `composer update` in your app to use the latest compatible versions.
 - Publishes a **docker/** folder: Dockerfile, entrypoint, **supervisord-web.conf** (Octane) and **supervisord-worker.conf** (queue + scheduler), php.ini.
 - Publishes a **.dockerignore** to keep build context small and fast.
 - **README** in `docker/` explains how to make the app stateless: session and cache in DB (or Redis), files on S3 (or other external storage).
@@ -36,7 +38,7 @@ Scale your Laravel app with one install: **Laravel Octane (FrankenPHP)**, a prod
 
 Run `scale:install` **once** from your local machine. The published files become part of your repo—commit them and push. CI and deployment platforms (Render, Fly.io, etc.) build from the repo; they do not run `scale:install` again.
 
-**From Packagist:**
+**From [Packagist](https://packagist.org/packages/laravel-scale/laravel-scale):**
 
 ```bash
 composer require laravel-scale/laravel-scale --dev
