@@ -220,7 +220,7 @@ This will:
 
 The install publishes two Dockerfiles: **`docker/Dockerfile`** (full: Node + PHP, builds Vite/assets) and **`docker/Dockerfile.backend`** (PHP only, no Node). It then sets which one is the *main* `docker/Dockerfile`:
 
-- **Interactive:** You are asked *"Does this app have a frontend in the same repo (React, Vue, Svelte, Vite, etc.)?"* — **Yes** (default) keeps the full Dockerfile; **No** overwrites `docker/Dockerfile` with the backend-only version. If you don't answer within **8 seconds**, it defaults to full (full stack).
+- **Interactive:** You are asked *"Does this app have a frontend in the same repo (React, Vue, Svelte, Vite, etc.)?"* — **Yes** (default) keeps the full Dockerfile; **No** overwrites `docker/Dockerfile` with the backend-only version. Press Enter for the default (full stack).
 - **`--no-frontend`:** Skips the question and uses the backend-only Dockerfile (for API-only apps).
 - **Non-interactive (e.g. CI):** No question is asked; the full Dockerfile is kept.
 

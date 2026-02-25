@@ -47,4 +47,37 @@ class InstallCommandTest extends TestCase
         $this->assertFileExists(base_path('docker/Dockerfile'));
         $this->assertFileExists(base_path('docker/docker-entrypoint.sh'));
     }
+
+    public function test_scale_install_with_no_frontend_uses_backend_dockerfile(): void
+    {
+        $this->artisan('scale:install', [
+            '--no-octane' => true,
+            '--no-dockerignore' => true,
+            '--no-gitignore' => true,
+            '--no-wayfinder' => true,
+            '--no-ziggy' => true,
+            '--no-frontend' => true,
+        ])->assertSuccessful();
+
+        $dockerfile = file_get_contents(base_path('docker/Dockerfile'));
+        $this->assertStringContainsString('backend/API only', $dockerfile);
+        $this->assertStringNotContainsString('FROM node', $dockerfile);
+    }
+
+    public function test_scale_install_when_user_chooses_no_frontend_overwrites_dockerfile(): void
+    {
+        $this->artisan('scale:install', [
+            '--no-octane' => true,
+            '--no-dockerignore' => true,
+            '--no-gitignore' => true,
+            '--no-wayfinder' => true,
+            '--no-ziggy' => true,
+        ])
+            ->expectsQuestion('Is App Monolithic: Does this app have a frontend in same repo as backend (React, Vue, Svelte, etc.)?', false)
+            ->assertSuccessful();
+
+        $dockerfile = file_get_contents(base_path('docker/Dockerfile'));
+        $this->assertStringContainsString('backend/API only', $dockerfile);
+        $this->assertStringNotContainsString('FROM node', $dockerfile);
+    }
 }

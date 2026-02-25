@@ -79,9 +79,8 @@ class InstallCommand extends Command
 
         $useBackend = $this->option('no-frontend');
         if (! $useBackend && $this->input->isInteractive()) {
-            $hasFrontend = $this->confirmWithTimeout(
+            $hasFrontend = $this->confirm(
                 'Is App Monolithic: Does this app have a frontend in same repo as backend (React, Vue, Svelte, etc.)?',
-                8,
                 true
             );
             $useBackend = ! $hasFrontend;
@@ -91,46 +90,6 @@ class InstallCommand extends Command
             file_put_contents($mainPath, file_get_contents($backendPath));
             $this->info('Using backend-only Dockerfile (no Node/Vite stage). docker/Dockerfile.backend is kept for reference.');
         }
-    }
-
-    /**
-     * Ask for confirmation with an optional timeout. If no answer within $timeoutSeconds, returns $default (full stack).
-     * In testing or when STDIN is not a TTY, uses normal confirm() so expectsQuestion() works and tests don't hang.
-     */
-    private function confirmWithTimeout(string $question, int $timeoutSeconds, bool $default = true): bool
-    {
-        $stream = STDIN;
-        if (! stream_isatty($stream)) {
-            return $this->confirm($question, $default);
-        }
-        if (function_exists('app') && app()->environment('testing')) {
-            return $this->confirm($question, $default);
-        }
-
-        $defaultLabel = $default ? 'Y' : 'N';
-        $this->output->write(sprintf('%s (Y/n) [default: %s, auto in %ds]: ', $question, $defaultLabel, $timeoutSeconds));
-
-        $read = [$stream];
-        $null = null;
-        if (@stream_select($read, $null, $null, $timeoutSeconds, 0) === 0) {
-            $this->output->writeln($defaultLabel);
-
-            return $default;
-        }
-
-        $line = fgets($stream);
-        if ($line === false || trim($line) === '') {
-            return $default;
-        }
-        $answer = strtolower(trim($line));
-        if (in_array($answer, ['y', 'yes'], true)) {
-            return true;
-        }
-        if (in_array($answer, ['n', 'no'], true)) {
-            return false;
-        }
-
-        return $default;
     }
 
     private function ensureTrustProxiesInBootstrap(): void
