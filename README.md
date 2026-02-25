@@ -12,7 +12,7 @@ Scale your Laravel app with one install: it comes with **Laravel Octane (Franken
 
 ## Why you need this
 
-A traditional Laravel deployment runs a single PHP process on the server (e.g. `php artisan serve` or one PHP-FPM worker). When your app gets 100,000 requests in a minute, they all queue up to that one process—bottleneck, timeouts, and a bad experience. Users at the bottom of that queue experience slow or failing requests.
+A traditional Laravel deployment runs a single PHP process on the server (e.g. `php artisan serve` or one PHP-FPM worker). When your app gets 100,000 requests in a minute, they all queue up to that one process, which will become bottlenecked, cause timeouts for user requests down the queue waiting, and give users a bad experience.
 
 With Laravel Scale, your app is containerized with Docker and can replicate into 10, 50, or 100+ instances automatically (autoscale).
 
