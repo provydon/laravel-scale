@@ -1,6 +1,6 @@
 # Laravel Scale
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/provydon/laravel-scale.svg?style=flat-square)](https://packagist.org/packages/provydon/laravel-scale) [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/provydon/laravel-scale?style=flat-square)](https://github.com/provydon/laravel-scale/releases)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/provydon/laravel-scale?style=flat-square)](https://github.com/provydon/laravel-scale/releases)
 
 Scale your Laravel app with one install: it comes with **Laravel Octane (FrankenPHP)**, a production-ready Docker setup, and a stateless web + worker layout that runs on Render, Laravel Cloud, Fly.io, Railway, and other container platforms.
 
@@ -27,8 +27,7 @@ This package gives you that setup in one command: Octane for high-concurrency HT
 ## Contents
 
 - [Install](#install)
-- [Quick path (minimal read)](#quick-path-minimal-read)
-- [Deploying on Render.com](#deploying-on-rendercom)
+- [Deploying on a Cloud Platform (eg Render.com)](#deploying-on-a-cloud-platform-eg-rendercom)
 - [After install](#after-install)
 - [What it does](#what-it-does)
 - [Typical dev journey](#typical-dev-journey)
@@ -42,8 +41,6 @@ This package gives you that setup in one command: Octane for high-concurrency HT
 
 Run `scale:install` **once** from your local machine. The published files become part of your repo—commit them and push. CI and deployment platforms (Render, Laravel Cloud, Fly.io, etc.) build from the repo; they do not run `scale:install` again.
 
-**From [Packagist](https://packagist.org/packages/provydon/laravel-scale):**
-
 ```bash
 composer require provydon/laravel-scale --dev --with-all-dependencies
 php artisan scale:install
@@ -51,13 +48,7 @@ php artisan scale:install
 
 Then commit `docker/`, `.dockerignore`, `app/Providers/ForceHttpsServiceProvider.php`, `app/Http/Middleware/ForceHttpsMiddleware.php`, `bootstrap/providers.php`, `bootstrap/app.php`, and `config/octane.php`. Run `composer update` to pull the latest Octane and other dependencies.
 
-## Quick path (minimal read)
-
-**Install** (above) → **Commit** the listed files → Set **stateless env** (`SESSION_DRIVER=database`, `CACHE_STORE=database`, `QUEUE_CONNECTION=database`) → Create **Web** + **Worker** on Render, **Dockerfile path** `docker/Dockerfile`, port **8000**, add DB and env vars → Deploy. For step-by-step Render setup, see **Deploying on Render.com** below.
-
-## Deploying on Render.com
-
-> **Before you deploy to production:** Set **`APP_ENV=production`** in your Web and Worker environment variables on Render (or your platform). If you leave `APP_ENV=local` or leave it unset, the app may generate `http://` asset URLs and the page can appear blank (Mixed Content blocked by the browser). Set **`APP_URL`** to your production URL with `https://` (e.g. `https://myapp.onrender.com` or your custom domain) as well.
+## Deploying on a Cloud Platform (eg Render.com)
 
 **Important:** Set **Dockerfile Path** to `docker/Dockerfile` for both Web and Worker services (Render needs this because the Dockerfile lives in the `docker/` folder).
 
@@ -78,7 +69,8 @@ Then commit `docker/`, `.dockerignore`, `app/Providers/ForceHttpsServiceProvider
    - **Instance Type**: pick size (e.g. Starter or higher).
 4. **Environment variables** (Add Environment Variable):
    - `APP_KEY` (generate with `php artisan key:generate --show` locally).
-   - `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://your-domain.com` (use your own domain; platform defaults like `*.onrender.com` can cause session issues).
+   - `APP_ENV=production`, `APP_DEBUG=false`. If you leave `APP_ENV=local` or leave it unset, the app may generate `http://` asset URLs and the page can appear blank (Mixed Content blocked by the browser).
+   - `APP_URL` set to your production URL with `https://` (e.g. `https://myapp.onrender.com` or your custom domain). Use your own domain; platform defaults like `*.onrender.com` can cause session issues.
    - `DEPLOYMENT_TYPE=web`.
    - Database: `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`. Use any database (PostgreSQL, MySQL, SQLite, etc.); on Render you can add a PostgreSQL instance and copy its env vars.
    - Stateless: `SESSION_DRIVER=database`, `CACHE_STORE=database`, `QUEUE_CONNECTION=database`, and if using S3: `FILESYSTEM_DISK=s3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`.
@@ -142,7 +134,7 @@ Use **your own domain or subdomain** for the app instead of the platform's defau
    `scale:install` adds or moves **`laravel/octane` into `require`** in your `composer.json` so the Docker image (which runs `composer install --no-dev`) gets Octane. The package is in `require-dev` so production’s `composer install --no-dev` won’t install it; the published files run in production.
 
 2. **Database**  
-   The Docker image includes **MySQL**, **PostgreSQL**, and **SQLite** drivers by default (`pdo_mysql`, `pdo_pgsql`, `pdo_sqlite`). Set `DB_CONNECTION` and your DB_* env vars (e.g. on Render) and it works. **See the “Database” section under *Deploying on Render* above** for essential requirements: your database must be reachable from your containers (correct ports open) and the DB user must have access to the database.
+   The Docker image includes **MySQL**, **PostgreSQL**, and **SQLite** drivers by default (`pdo_mysql`, `pdo_pgsql`, `pdo_sqlite`). Set `DB_CONNECTION` and your DB_* env vars (e.g. on Render) and it works. **See the “Database” section under *Deploying on a Cloud Platform* above** for essential requirements: your database must be reachable from your containers (correct ports open) and the DB user must have access to the database.
 
 3. **Stateless setup**  
    In Render (and `.env.example`), set:
