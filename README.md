@@ -61,12 +61,8 @@ Then commit `docker/`, `.dockerignore`, `app/Providers/ForceHttpsServiceProvider
    - **Region**: choose one
    - **Environment**: **Docker**
    - **Dockerfile Path**: **`docker/Dockerfile`** (required—set in **Advanced** if not visible).
-   - **Build Command**: leave default (Render runs `docker build` from repo root) or set:
-     ```bash
-     docker build -f docker/Dockerfile --build-arg DEPLOYMENT_TYPE=web -t app:latest .
-     ```
-   - **Start Command**: leave empty so the image's **ENTRYPOINT** runs (entrypoint starts Octane via Supervisor).
    - **Instance Type**: pick size (e.g. Starter or higher).
+   - Leave the rest default or set if you need to.
 4. **Environment variables** (Add Environment Variable):
    - `APP_KEY` (generate with `php artisan key:generate --show` locally).
    - `APP_ENV=production`, `APP_DEBUG=false`. If you leave `APP_ENV=local` or leave it unset, the app may generate `http://` asset URLs and the page can appear blank (Mixed Content blocked by the browser).
