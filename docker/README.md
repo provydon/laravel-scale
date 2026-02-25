@@ -169,7 +169,9 @@ If the frontend build still fails (e.g. missing env, other plugins), you can ski
 
 ## Backend-only / API-only apps (no frontend)
 
-If your app has **no Node frontend** (Vite, Blade with assets, etc.)—e.g. a pure API or backend service—you can remove the frontend parts from the Dockerfile to speed up builds and shrink the image:
+If your app has **no Node frontend** (Vite, Blade with assets, etc.)—e.g. a pure API or backend service—run `php artisan scale:install`. The command will **ask** whether your app has a frontend in the same repo; answer **No** to use the backend-only Dockerfile. Or pass **`--no-frontend`** to skip the question and use the backend-only version. The install then sets `docker/Dockerfile` to the contents of `Dockerfile.backend` (no Node stage, faster builds). Both `Dockerfile` and `Dockerfile.backend` stay in `docker/` so you can switch later by overwriting `docker/Dockerfile` with `docker/Dockerfile.backend` or re-running the install and answering Yes to restore the full Dockerfile.
+
+If you prefer to edit by hand, you can still remove the frontend parts from the Dockerfile manually:
 
 1. Remove the entire **frontend stage** (between the `# --- BEGIN FRONTEND` and `# --- END FRONTEND ---` comments): the `FROM node:20 AS frontend` block through `RUN if [ "$SKIP_FRONTEND" = "1" ]...`.
 2. Remove the **frontend copy block** (between `# --- BEGIN FRONTEND COPY` and `# --- END FRONTEND COPY ---`): the `COPY --from=frontend` line and the `RUN if [ "$DEPLOYMENT_TYPE" != "worker" ]...` block.

@@ -14,7 +14,9 @@ class InstallCommandTest extends TestCase
             '--no-gitignore' => true,
             '--no-wayfinder' => true,
             '--no-ziggy' => true,
-        ])->assertSuccessful();
+        ])
+            ->expectsQuestion('Is App Monolithic: Does this app have a frontend in same repo as backend (React, Vue, Svelte, etc.)?', true)
+            ->assertSuccessful();
 
         $providerPath = base_path('app/Providers/ForceHttpsServiceProvider.php');
         $this->assertFileExists($providerPath);
@@ -38,7 +40,9 @@ class InstallCommandTest extends TestCase
             '--no-gitignore' => true,
             '--no-wayfinder' => true,
             '--no-ziggy' => true,
-        ])->assertSuccessful();
+        ])
+            ->expectsQuestion('Is App Monolithic: Does this app have a frontend in same repo as backend (React, Vue, Svelte, etc.)?', true)
+            ->assertSuccessful();
 
         $this->assertFileExists(base_path('docker/Dockerfile'));
         $this->assertFileExists(base_path('docker/docker-entrypoint.sh'));

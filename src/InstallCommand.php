@@ -12,7 +12,8 @@ class InstallCommand extends Command
                             {--no-dockerignore : Skip publishing .dockerignore}
                             {--no-gitignore : Skip updating .gitignore}
                             {--no-wayfinder : Skip Wayfinder vite/gitignore adjustments}
-                            {--no-ziggy : Skip Ziggy vendor-path fix for Docker frontend builds}';
+                            {--no-ziggy : Skip Ziggy vendor-path fix for Docker frontend builds}
+                            {--no-frontend : Use backend-only Dockerfile (no Node/Vite; for API-only apps)}';
 
     protected $description = 'Publish Docker files and optionally install Octane (FrankenPHP) for production scaling';
 
@@ -22,6 +23,8 @@ class InstallCommand extends Command
     {
         $this->info('Publishing Docker files...');
         $this->call('vendor:publish', ['--tag' => 'laravel-scale', '--force' => true]);
+
+        $this->chooseDockerfile();
 
         if (! $this->option('no-dockerignore')) {
             $this->info('Publishing .dockerignore...');
@@ -61,8 +64,73 @@ class InstallCommand extends Command
 
         $this->newLine();
         $this->info('Done. Commit docker/, .dockerignore, app/Providers/ForceHttpsServiceProvider.php, app/Http/Middleware/ForceHttpsMiddleware.php, bootstrap/providers.php, bootstrap/app.php, and config/octane.php to your repo. Ensure your app is stateless: session and cache in DB (or Redis), files on S3/external. See README in docker/.');
+        $this->comment('To switch Dockerfile later: overwrite docker/Dockerfile with docker/Dockerfile.backend for API-only, or re-run scale:install and choose frontend to restore the full Dockerfile.');
 
         return self::SUCCESS;
+    }
+
+    private function chooseDockerfile(): void
+    {
+        $backendPath = base_path('docker/Dockerfile.backend');
+        $mainPath = base_path('docker/Dockerfile');
+        if (! file_exists($backendPath)) {
+            return;
+        }
+
+        $useBackend = $this->option('no-frontend');
+        if (! $useBackend && $this->input->isInteractive()) {
+            $hasFrontend = $this->confirmWithTimeout(
+                'Is App Monolithic: Does this app have a frontend in same repo as backend (React, Vue, Svelte, etc.)?',
+                8,
+                true
+            );
+            $useBackend = ! $hasFrontend;
+        }
+
+        if ($useBackend) {
+            file_put_contents($mainPath, file_get_contents($backendPath));
+            $this->info('Using backend-only Dockerfile (no Node/Vite stage). docker/Dockerfile.backend is kept for reference.');
+        }
+    }
+
+    /**
+     * Ask for confirmation with an optional timeout. If no answer within $timeoutSeconds, returns $default (full stack).
+     * In testing or when STDIN is not a TTY, uses normal confirm() so expectsQuestion() works and tests don't hang.
+     */
+    private function confirmWithTimeout(string $question, int $timeoutSeconds, bool $default = true): bool
+    {
+        $stream = STDIN;
+        if (! stream_isatty($stream)) {
+            return $this->confirm($question, $default);
+        }
+        if (function_exists('app') && app()->environment('testing')) {
+            return $this->confirm($question, $default);
+        }
+
+        $defaultLabel = $default ? 'Y' : 'N';
+        $this->output->write(sprintf('%s (Y/n) [default: %s, auto in %ds]: ', $question, $defaultLabel, $timeoutSeconds));
+
+        $read = [$stream];
+        $null = null;
+        if (@stream_select($read, $null, $null, $timeoutSeconds, 0) === 0) {
+            $this->output->writeln($defaultLabel);
+
+            return $default;
+        }
+
+        $line = fgets($stream);
+        if ($line === false || trim($line) === '') {
+            return $default;
+        }
+        $answer = strtolower(trim($line));
+        if (in_array($answer, ['y', 'yes'], true)) {
+            return true;
+        }
+        if (in_array($answer, ['n', 'no'], true)) {
+            return false;
+        }
+
+        return $default;
     }
 
     private function ensureTrustProxiesInBootstrap(): void

@@ -54,11 +54,21 @@ Then commit `docker/`, `.dockerignore`, `app/Providers/ForceHttpsServiceProvider
 
 This will:
 
-1. Publish `docker/` (Dockerfile, entrypoint, supervisor configs, php.ini).
+1. Publish `docker/` (Dockerfile, Dockerfile.backend, entrypoint, supervisor configs, php.ini). Then **ask** whether your app has a frontend (Vite, Blade with assets, etc.); if no (or you pass `--no-frontend`), the main `docker/Dockerfile` is set to the backend-only version (no Node stage). Both variants are in `docker/`; you can switch later by overwriting `Dockerfile` with `Dockerfile.backend` or re-running the install.
 2. Publish `.dockerignore`.
 3. Run `octane:install --server=frankenphp` (unless you pass `--no-octane`).
 4. Update `.gitignore` so `docker/` and `config/octane.php` are committed (unless you pass `--no-gitignore`).
 5. If you use **Laravel Wayfinder**: remove the Wayfinder plugin from `vite.config.*` (so `npm run build` in Docker doesn't run PHP) and add `!resources/js/routes/`, `!resources/js/actions/`, and `!resources/js/wayfinder/` to `.gitignore` so generated files are committed. Run `php artisan wayfinder:generate` locally and commit the output before deploying.
+
+**Choosing full vs backend-only Dockerfile**
+
+The install publishes two Dockerfiles: **`docker/Dockerfile`** (full: Node + PHP, builds Vite/assets) and **`docker/Dockerfile.backend`** (PHP only, no Node). It then sets which one is the *main* `docker/Dockerfile`:
+
+- **Interactive:** You are asked *"Does this app have a frontend in the same repo (React, Vue, Svelte, Vite, etc.)?"* — **Yes** (default) keeps the full Dockerfile; **No** overwrites `docker/Dockerfile` with the backend-only version. If you don’t answer within **8 seconds**, it defaults to full (full stack).
+- **`--no-frontend`:** Skips the question and uses the backend-only Dockerfile (for API-only apps).
+- **Non-interactive (e.g. CI):** No question is asked; the full Dockerfile is kept.
+
+You can switch later by overwriting `docker/Dockerfile` with `docker/Dockerfile.backend`, or re-run `scale:install` and answer the question to restore the full one.
 
 Options:
 
@@ -66,6 +76,7 @@ Options:
 - `--no-dockerignore` – Don’t overwrite `.dockerignore`.
 - `--no-gitignore` – Don't update `.gitignore` (ensures `docker/` and `config/octane.php` are committed).
 - `--no-wayfinder` – Skip Wayfinder Vite and .gitignore adjustments.
+- `--no-frontend` – Use the backend-only Dockerfile (no Node/Vite); for API-only apps. Without this, `scale:install` asks whether your app has a frontend and sets `docker/Dockerfile` accordingly (full or backend-only).
 
 ## After install
 
