@@ -2,7 +2,7 @@
 
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/provydon/laravel-scale?style=flat-square)](https://github.com/provydon/laravel-scale/releases)
 
-Scale your Laravel app with one install: it comes with **Laravel Octane (FrankenPHP)**, a production-ready Docker setup, and a stateless web + worker layout that runs on Render, Laravel Cloud, Fly.io, Railway, and other container platforms.
+Scale your Laravel app with one install: it comes with **Laravel Octane (FrankenPHP)**, a production-ready Docker setup, and a stateless web + worker layout that easily runs your Laravel app on Render, Laravel Cloud, Fly.io, Railway, **AWS ECS & EKS**, **Google GKE & Cloud Run**, and other container platforms.
 
 ---
 
@@ -16,7 +16,7 @@ A traditional Laravel deployment runs a single PHP process on the server (e.g. `
 
 With Laravel Scale, your app is containerized with Docker and can replicate into 10, 50, or 100+ instances automatically (autoscale).
 
-Deployment platforms like Render, Laravel Cloud, Fly.io, and Railway run on Kubernetes (or similar orchestration) under the hood, so your container is scheduled and scaled for you—**you don’t need to know or manage Kubernetes yourself.** The platform’s load balancer spreads those 100k requests across the running containers.
+Deployment platforms like Render, Laravel Cloud, Fly.io, Railway, **AWS ECS & EKS**, and **Google GKE & Cloud Run** run on Kubernetes (or similar orchestration) under the hood, so your container is scheduled and scaled for you—**you don’t need to know or manage Kubernetes yourself.** The platform’s load balancer spreads those 100k requests across the running containers.
 
 For example, your web service can autoscale to 100 instances; that’s about 1,000 requests per instance—all of them process fast for users instead of piling up on a single process.
 
