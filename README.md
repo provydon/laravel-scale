@@ -49,9 +49,6 @@ php artisan scale:install
 Then commit `docker/`, `.dockerignore`, `app/Providers/ForceHttpsServiceProvider.php`, `app/Http/Middleware/ForceHttpsMiddleware.php`, `bootstrap/providers.php`, `bootstrap/app.php`, and `config/octane.php`. Run `composer update` to pull the latest Octane and other dependencies.
 
 ## Deploying on a Cloud Platform (eg Render.com)
-
-**Important:** Set **Dockerfile Path** to `docker/Dockerfile` for both Web and Worker services (Render needs this because the Dockerfile lives in the `docker/` folder).
-
 ### 1. Create a Web Service (Docker)
 
 1. In [Render Dashboard](https://dashboard.render.com), click **New +** → **Web Service**.
