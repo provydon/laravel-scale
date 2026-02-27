@@ -31,7 +31,7 @@ composer require provydon/laravel-scale --dev --with-all-dependencies
 php artisan scale:install
 ```
 
-Next, commit the files the command added to your project:
+Next, commit and push the files and folders the command added to your project—they're needed for autoscaling:
 
 - `docker/`
 - `.dockerignore`
