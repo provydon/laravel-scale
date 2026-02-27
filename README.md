@@ -12,52 +12,13 @@ Scale your Laravel app with one install: it comes with **Laravel Octane (Franken
 
 ## Why You Need Laravel Scale
 
-Most Laravel apps are deployed on a single server with a fixed number of PHP-FPM workers.
+Most Laravel apps run on a single server with fixed PHP-FPM workers. That works — until traffic spikes (launch, campaign, viral moment). Then requests queue, response times blow up, users hit timeouts, and revenue is lost. You can scale up the server, but there's a ceiling.
 
-That setup works great — until traffic spikes.
+Cloud platforms scale differently: they replicate your app across many instances and distribute traffic automatically (**horizontal autoscaling**). Laravel isn't ready for that out of the box. You need containerization, web + worker separation, stateless sessions, external cache/queues/storage, and a runtime like Octane. Getting that right takes time.
 
-When your app suddenly gets a surge of requests (a ticket drop, product launch, campaign, or viral moment), your server can only handle as many concurrent requests as its CPU and workers allow. Once those are saturated:
+**Laravel Scale gives you that autoscaling setup with just one install.** Your app runs in Docker, deploys to Render, Laravel Cloud, Fly.io, Railway, AWS, or Google Cloud, and autoscales with demand instead of collapsing under spikes.
 
-- Requests begin to queue
-- Response times increase
-- Users experience timeouts
-- Revenue is lost
-
-You can upgrade the server (vertical scaling), but there's always a ceiling.
-
-Modern cloud platforms scale differently.
-
-Instead of making one machine bigger, they replicate your app into multiple instances and distribute traffic across them automatically. This is **horizontal autoscaling**.
-
-But Laravel apps are not automatically ready for that.
-
-To scale properly across multiple instances, your app must:
-
-- Be containerized
-- Run in a web + worker separated architecture
-- Use stateless sessions
-- Externalize cache, queues, and file storage
-- Avoid local filesystem dependencies
-- Support high-concurrency runtimes like Octane
-
-That setup takes time and infrastructure knowledge.
-
-**Laravel Scale gives you all that autoscaling setup with just one install.**
-
-It prepares your Laravel app to:
-
-- Run in Docker
-- Deploy cleanly on platforms like Render, Laravel Cloud, Fly.io, Railway, AWS, or Google Cloud
-- Autoscale horizontally
-- Handle traffic spikes without collapsing
-
-Instead of guessing how many users your server can handle, your infrastructure grows with demand.
-
-Laravel Scale moves your app from:
-
-**Fixed server capacity** → **Cloud-native autoscaling architecture**
-
-If you're building something that can spike, go viral, or sell out fast and love and want to continue using Laravel— this isn't optional. It's infrastructure insurance.
+**Fixed server capacity** → **Cloud-native autoscaling.** If you're building something that can spike, go viral, or sell out fast—and you want to keep using Laravel—this isn't optional. It's infrastructure insurance.
 
 ---
 
