@@ -16,7 +16,7 @@ Most Laravel apps run on a single server with fixed PHP-FPM workers—often just
 
 Cloud platforms scale differently: they replicate your app across many instances and distribute traffic automatically (**horizontal autoscaling**). Laravel isn't ready for that out of the box. You need containerization, web + worker separation, stateless sessions, external cache/queues/storage, and a runtime like Octane. Getting that right takes time.
 
-**Laravel Scale gives you that autoscaling setup with just one install.** Your app can now run in Docker, deploy to Cloud platforms like Render, AWS, GCP, Railway, etc, and autoscales with demand instead of collapsing under spikes.
+**Laravel Scale gives you that autoscaling setup with just one install.** Your app will now be able to run in Docker, deploy to Cloud platforms like Render, AWS, GCP, Railway, etc, and autoscales with demand instead of collapsing under spikes.
 
 Move from **Old Fixed server capacity** → **New Cloud-native autoscaling.** If you're building something that could spike, go viral, or serve millions and want to stay in Laravel. This helps your Laravel app be ready when it happens.
 
