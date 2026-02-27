@@ -42,7 +42,7 @@ To scale properly across multiple instances, your app must:
 
 That setup takes time and infrastructure knowledge.
 
-**Laravel Scale gives you that foundation in one command.**
+**Laravel Scale gives you all that autoscaling setup with just one install.**
 
 It prepares your Laravel app to:
 
@@ -57,7 +57,7 @@ Laravel Scale moves your app from:
 
 **Fixed server capacity** → **Cloud-native autoscaling architecture**
 
-If you're building something that can spike, go viral, or sell out fast — this isn't optional. It's infrastructure insurance.
+If you're building something that can spike, go viral, or sell out fast and love and want to continue using Laravel— this isn't optional. It's infrastructure insurance.
 
 ---
 
