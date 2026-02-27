@@ -18,7 +18,7 @@ Cloud platforms scale differently: they replicate your app across many instances
 
 **Laravel Scale gives you that autoscaling setup with just one install.** Your app can now run in Docker, deploy to Render, Laravel Cloud, Fly.io, Railway, AWS, or Google Cloud, and autoscales with demand instead of collapsing under spikes.
 
-*Move from *Old Fixed server capacity** → **New Cloud-native autoscaling.** If you're building something that can spike, go viral, or sell out fast—and you want to keep using Laravel—this isn't optional. It's infrastructure insurance.
+**Fixed server capacity** → **Cloud-native autoscaling.** If you're building something that could spike, go viral, or serve millions and want to stay in Laravel. This helps your Laravel app be ready when it happens.
 
 ---
 
