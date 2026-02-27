@@ -22,22 +22,11 @@ Cloud platforms scale differently: they replicate your app across many instances
 
 ---
 
-## Contents
+## Getting started
 
-- [Install](#install)
-- [Deploying on a Cloud Platform (eg Render.com)](#deploying-on-a-cloud-platform-eg-rendercom)
-- [After install](#after-install)
-- [What it does](#what-it-does)
-- [Typical dev journey](#typical-dev-journey)
-- [Local development](#local-development)
-- [Contributing (install from local path)](#contributing-install-from-local-path)
-- [Support](#support)
+In your project folder on your local machine, download the package and run `scale:install`—that's it.
 
----
-
-## Install
-
-Run `scale:install` **once** from your local machine. The published files become part of your repo—commit them and push. CI and deployment platforms (Render, Laravel Cloud, Fly.io, etc.) build from the repo; they do not run `scale:install` again.
+Run it **once**; the published files become part of your repo—commit them and push. CI and deployment platforms (Render, Laravel Cloud, Fly.io, etc.) build from the repo; they do not run `scale:install` again.
 
 ```bash
 composer require provydon/laravel-scale --dev --with-all-dependencies
@@ -116,6 +105,17 @@ If you use Redis for cache, session, or queue, add the PHP Redis extension to th
 Use **your own domain or subdomain** for the app instead of the platform's default (e.g. `*.onrender.com`). Platform default domains can cause session handling issues and sessions may invalidate unexpectedly. Add your domain in the Web Service → **Settings** → **Custom Domains**; Render provides TLS. **Set `APP_URL` to the exact URL your app's DNS points to** (e.g. `https://app.yourdomain.com`). When the app is behind a load balancer, `APP_URL` must match the public URL or links, redirects, and assets can break.
 
 `scale:install` adds **`trustProxies(at: '*')`** and **`statefulApi()`** to `bootstrap/app.php` so that behind a reverse proxy (e.g. Render) the app uses the forwarded protocol and generates `https://` asset URLs. Without this, the page can load over HTTPS but request CSS/JS over HTTP (mixed content), and the frontend may appear blank.
+
+---
+
+## Contents
+
+- [After install](#after-install)
+- [What it does](#what-it-does)
+- [Typical dev journey](#typical-dev-journey)
+- [Local development](#local-development)
+- [Contributing (install from local path)](#contributing-install-from-local-path)
+- [Support](#support)
 
 ---
 
