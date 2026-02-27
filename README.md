@@ -26,14 +26,20 @@ Move from **Old Fixed server capacity** → **New Cloud-native autoscaling.** If
 
 In your project folder on your local machine, download the package and run `scale:install`—that's it.
 
-Run it **once**; the published files become part of your repo—commit them and push. CI and deployment platforms (Render, Laravel Cloud, Fly.io, etc.) build from the repo; they do not run `scale:install` again.
-
 ```bash
 composer require provydon/laravel-scale --dev --with-all-dependencies
 php artisan scale:install
 ```
 
-Then commit `docker/`, `.dockerignore`, `app/Providers/ForceHttpsServiceProvider.php`, `app/Http/Middleware/ForceHttpsMiddleware.php`, `bootstrap/providers.php`, `bootstrap/app.php`, and `config/octane.php`. Run `composer update` to pull the latest Octane and other dependencies.
+Next, commit the files the command added to your project:
+
+- `docker/`
+- `.dockerignore`
+- `app/Providers/ForceHttpsServiceProvider.php`
+- `app/Http/Middleware/ForceHttpsMiddleware.php`
+- `bootstrap/providers.php`
+- `bootstrap/app.php`
+- `config/octane.php`
 
 ## Deploying on a Cloud Platform (eg Render.com)
 ### 1. Create a Web Service (Docker)
