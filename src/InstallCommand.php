@@ -11,6 +11,7 @@ class InstallCommand extends Command
                             {--no-octane : Skip running octane:install (e.g. if already installed)}
                             {--no-dockerignore : Skip publishing .dockerignore}
                             {--no-gitignore : Skip updating .gitignore}
+                            {--no-env-example : Skip updating .env.example session variables}
                             {--no-wayfinder : Skip Wayfinder vite/gitignore adjustments}
                             {--no-ziggy : Skip Ziggy vendor-path fix for Docker frontend builds}
                             {--no-frontend : Use backend-only Dockerfile (no Node/Vite; for API-only apps)}';
@@ -53,6 +54,11 @@ class InstallCommand extends Command
             $this->updateGitignore($usesWayfinder);
         }
 
+        if (! $this->option('no-env-example')) {
+            $this->info('Updating .env.example for stateless session (only SESSION_DOMAIN, SESSION_DRIVER, SESSION_LIFETIME)...');
+            $this->updateEnvExample();
+        }
+
         $this->info('Ensuring proxy and HTTPS handling in bootstrap/app.php...');
         $this->ensureTrustProxiesInBootstrap();
 
@@ -63,7 +69,7 @@ class InstallCommand extends Command
         $this->ensureForceHttpsMiddlewareRegistered();
 
         $this->newLine();
-        $this->info('Done. Commit docker/, .dockerignore, app/Providers/ForceHttpsServiceProvider.php, app/Http/Middleware/ForceHttpsMiddleware.php, bootstrap/providers.php, bootstrap/app.php, and config/octane.php to your repo. Ensure your app is stateless: session and cache in DB (or Redis), files on S3/external. See README in docker/.');
+        $this->info('Done. Commit docker/, .dockerignore, .env.example, app/Providers/ForceHttpsServiceProvider.php, app/Http/Middleware/ForceHttpsMiddleware.php, bootstrap/providers.php, bootstrap/app.php, and config/octane.php to your repo. Ensure your app is stateless: session and cache in DB (or Redis), files on S3/external. See README in docker/.');
         $this->comment('To switch Dockerfile later: overwrite docker/Dockerfile with docker/Dockerfile.backend for API-only, or re-run scale:install and choose frontend to restore the full Dockerfile.');
 
         return self::SUCCESS;
@@ -392,5 +398,55 @@ class InstallCommand extends Command
             ."**/caddy\n";
 
         file_put_contents($path, $contents.$block);
+    }
+
+    private function updateEnvExample(): void
+    {
+        $path = base_path('.env.example');
+        if (! file_exists($path)) {
+            return;
+        }
+
+        $lines = file($path, FILE_IGNORE_NEW_LINES);
+        if ($lines === false) {
+            return;
+        }
+
+        // Remove any line that sets or comments SESSION_* (optional leading # and spaces)
+        $filtered = array_filter($lines, function (string $line): bool {
+            $trimmed = trim($line);
+            if ($trimmed === '') {
+                return true;
+            }
+            return ! preg_match('/^#?\s*SESSION_\w+\s*=/', $trimmed);
+        });
+
+        $content = implode("\n", array_values($filtered));
+
+        // Insert the three stateless session vars after APP_URL (or APP_KEY if no APP_URL)
+        $sessionBlock = "\n# Session (stateless: only these three; replace .example.com with your root domain)\n"
+            ."SESSION_DOMAIN=.example.com\n"
+            ."SESSION_DRIVER=database\n"
+            ."SESSION_LIFETIME=120\n";
+
+        if (preg_match('/^\s*APP_URL\s*=/m', $content)) {
+            $content = preg_replace(
+                '/(^\s*APP_URL\s*=.*)$/m',
+                '$1'.$sessionBlock,
+                $content,
+                1
+            );
+        } elseif (preg_match('/^\s*APP_KEY\s*=/m', $content)) {
+            $content = preg_replace(
+                '/(^\s*APP_KEY\s*=.*)$/m',
+                '$1'.$sessionBlock,
+                $content,
+                1
+            );
+        } else {
+            $content = rtrim($content).$sessionBlock;
+        }
+
+        file_put_contents($path, $content."\n");
     }
 }

@@ -57,9 +57,10 @@ Next, commit and push the files and folders the command added to your project—
    - `APP_KEY` (generate with `php artisan key:generate --show` locally).
    - `APP_ENV=production`, `APP_DEBUG=false`. If you leave `APP_ENV=local` or leave it unset, the app may generate `http://` asset URLs and the page can appear blank (Mixed Content blocked by the browser).
    - `APP_URL` set to your production URL with `https://` (e.g. `https://myapp.onrender.com` or your custom domain). Use your own domain; platform defaults like `*.onrender.com` can cause session issues.
+   - `APP_NAME`: if the name contains spaces, wrap the value in an extra single quotation so it is parsed correctly, e.g. `APP_NAME='"Digitalize with AI"'`.
    - `DEPLOYMENT_TYPE=web`.
    - Database: `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`. Use any database (PostgreSQL, MySQL, SQLite, etc.); on Render you can add a PostgreSQL instance and copy its env vars.
-   - Stateless: `SESSION_DRIVER=database`, `CACHE_STORE=database`, `QUEUE_CONNECTION=database`, and if using S3: `FILESYSTEM_DISK=s3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`.
+   - Stateless: For **session**, set only these three and remove any other `SESSION_*` from `.env.example` and your platform env so Laravel defaults apply (avoids session issues when deployed): `SESSION_DOMAIN=.example.com` (replace with your root domain, e.g. `.yourdomain.com`), `SESSION_DRIVER=database`, `SESSION_LIFETIME=120`. Also set `CACHE_STORE=database`, `QUEUE_CONNECTION=database`, and if using S3: `FILESYSTEM_DISK=s3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`.
    - Optional—broadcasting: `BROADCAST_CONNECTION=pusher` (or reverb/ably) and driver-specific env vars (e.g. `PUSHER_APP_ID`, `PUSHER_APP_KEY`, etc.) on both Web and Worker.
 5. **Port**: set **Port** to **8000** (Octane listens on 8000).
 6. Save and deploy. Render will build the Docker image and start the web service.
@@ -135,7 +136,7 @@ Use **your own domain or subdomain** for the app instead of the platform's defau
 
 3. **Stateless setup**  
    In Render (and `.env.example`), set:
-   - **Session**: `SESSION_DRIVER=database` (or `redis`).
+   - **Session**: Remove all existing `SESSION_*` variables, then set only `SESSION_DOMAIN=.example.com` (replace with your root domain, e.g. `.yourdomain.com`), `SESSION_DRIVER=database`, and `SESSION_LIFETIME=120`. Leave other session settings as Laravel defaults so sessions work properly in this stateless environment (see **docker/README.md** for details).
    - **Cache**: `CACHE_STORE=database` (or `redis`).
    - **Files**: `FILESYSTEM_DISK=s3` and AWS_* (or other external disk).
    - **Queue**: `QUEUE_CONNECTION=database` (or `redis`) for the worker service.
@@ -174,7 +175,7 @@ See **docker/README.md** (published into your app) for the full stateless checkl
 1. **Local setup** – Create your Laravel app, develop as usual (Blade, Inertia, API, etc.).
 2. **Install once** – When ready to deploy: `composer require provydon/laravel-scale --dev --with-all-dependencies` and `php artisan scale:install`.
 3. **Commit** – Commit `docker/`, `.dockerignore`, `app/Providers/ForceHttpsServiceProvider.php`, `app/Http/Middleware/ForceHttpsMiddleware.php`, `bootstrap/providers.php`, `bootstrap/app.php`, `config/octane.php`, and the `.gitignore` changes. Push to GitHub/GitLab.
-4. **Stateless config** – In `.env.example` (and your platform’s env), set `SESSION_DRIVER=database`, `CACHE_STORE=database`, `QUEUE_CONNECTION=database`. Use S3 for uploads. Add Redis extension to Dockerfile if using Redis.
+4. **Stateless config** – In `.env.example` (and your platform’s env), remove all other `SESSION_*` and set only `SESSION_DOMAIN=.example.com` (use your root domain), `SESSION_DRIVER=database`, `SESSION_LIFETIME=120`; set `CACHE_STORE=database`, `QUEUE_CONNECTION=database`. Use S3 for uploads. Add Redis extension to Dockerfile if using Redis. See **docker/README.md** for the full session/deployment checklist.
 5. **Platform** – Create a Web Service (Docker) and a Background Worker on Render (or similar). Point both at your repo. Set **Dockerfile Path** to `docker/Dockerfile` for each. Add a database (e.g. PostgreSQL on Render) and set env vars, deploy.
 6. **Iterate** – Push code; platform rebuilds from the repo. No `scale:install` in CI—everything is already in the repo.
 
@@ -214,7 +215,7 @@ This will:
 1. Publish `docker/` (Dockerfile, Dockerfile.backend, entrypoint, supervisor configs, php.ini). Then **ask** whether your app has a frontend (Vite, Blade with assets, etc.); if no (or you pass `--no-frontend`), the main `docker/Dockerfile` is set to the backend-only version (no Node stage). Both variants are in `docker/`; you can switch later by overwriting `Dockerfile` with `Dockerfile.backend` or re-running the install.
 2. Publish `.dockerignore`.
 3. Run `octane:install --server=frankenphp` (unless you pass `--no-octane`).
-4. Update `.gitignore` so `docker/` and `config/octane.php` are committed (unless you pass `--no-gitignore`).
+4. Update `.gitignore` so `docker/` and `config/octane.php` are committed (unless you pass `--no-gitignore`). Update `.env.example` so only the three stateless session vars are set (unless you pass `--no-env-example`).
 5. If you use **Laravel Wayfinder**: remove the Wayfinder plugin from `vite.config.*` (so `npm run build` in Docker doesn't run PHP) and add `!resources/js/routes/`, `!resources/js/actions/`, and `!resources/js/wayfinder/` to `.gitignore` so generated files are committed. Run `php artisan wayfinder:generate` locally and commit the output before deploying.
 
 **Choosing full vs backend-only Dockerfile**
@@ -232,6 +233,7 @@ Options:
 - `--no-octane` – Only publish files; don't run Octane install.
 - `--no-dockerignore` – Don't overwrite `.dockerignore`.
 - `--no-gitignore` – Don't update `.gitignore` (ensures `docker/` and `config/octane.php` are committed).
+- `--no-env-example` – Don't update `.env.example` (keeps existing session vars; install normally strips other `SESSION_*` and sets only `SESSION_DOMAIN`, `SESSION_DRIVER`, `SESSION_LIFETIME`).
 - `--no-wayfinder` – Skip Wayfinder Vite and .gitignore adjustments.
 - `--no-frontend` – Use the backend-only Dockerfile (no Node/Vite); for API-only apps. Without this, `scale:install` asks whether your app has a frontend and sets `docker/Dockerfile` accordingly (full or backend-only).
 

@@ -77,15 +77,20 @@ Render instances are ephemeral and can scale to N copies. **Session, cache, and 
 
 ### 1. Session → database (or Redis)
 
+For stateless deployment, **remove all existing `SESSION_*` variables** from `.env.example` and your platform’s env, then set **only these three**. Leave every other session setting as Laravel’s default (in `config/session.php`) so sessions work correctly across instances and behind load balancers.
+
 - **Driver**: `SESSION_DRIVER=database` (or `redis`).
+- **Domain**: Set to your root domain with a leading dot so the cookie is valid across subdomains (e.g. `.yourdomain.com`; use `.example.com` only as a placeholder and replace with your real domain).
+- **Lifetime**: Session lifetime in minutes (e.g. `120` = 2 hours).
 - **Table**: Laravel’s default migration creates `sessions`. Ensure migrations are run on deploy (entrypoint does this for web).
-- **Config**: `config/session.php` – `connection` and `table` stay default unless you need a dedicated DB.
 
 ```env
+SESSION_DOMAIN=.example.com
 SESSION_DRIVER=database
-# SESSION_CONNECTION=  # optional, default DB
-# SESSION_TABLE=sessions
+SESSION_LIFETIME=120
 ```
+
+Replace `.example.com` with your actual root domain (e.g. `.yourdomain.com`). Do **not** add other `SESSION_*` vars (e.g. `SESSION_CONNECTION`, `SESSION_TABLE`, `SESSION_SECURE_COOKIE`, etc.); let Laravel use its defaults.
 
 ### 2. Cache → database or Redis
 
@@ -143,7 +148,7 @@ PUSHER_APP_CLUSTER=...
 
 | Concern        | Use in production (stateless) |
 |----------------|--------------------------------|
-| Sessions       | `SESSION_DRIVER=database` or `redis` |
+| Sessions       | Only `SESSION_DOMAIN`, `SESSION_DRIVER`, `SESSION_LIFETIME` (remove other `SESSION_*`; see above) |
 | Cache          | `CACHE_STORE=database` or `redis` |
 | Uploads/files  | `FILESYSTEM_DISK=s3` (or other external disk) |
 | Queue          | `QUEUE_CONNECTION=database` or `redis` |
@@ -189,7 +194,7 @@ The Dockerfile comments mark these sections. After removal, the image will build
 
 ### Deploying on Render.com
 
-1. **Web Service**: New → Web Service → connect repo → Environment: **Docker**. Set **Dockerfile Path** to **`docker/Dockerfile`** (required; in Advanced if not visible). **Port**: **8000**. Env: `DEPLOYMENT_TYPE=web`, `APP_KEY`, DB_*, and stateless vars (`SESSION_DRIVER=database`, `CACHE_STORE=database`, etc.). Leave **Start Command** empty so the image entrypoint runs.
+1. **Web Service**: New → Web Service → connect repo → Environment: **Docker**. Set **Dockerfile Path** to **`docker/Dockerfile`** (required; in Advanced if not visible). **Port**: **8000**. Env: `DEPLOYMENT_TYPE=web`, `APP_KEY`, DB_*, and stateless vars. If `APP_NAME` contains spaces, wrap it in an extra single quotation (e.g. `APP_NAME='"Digitalize with AI"'`). For session: set only `SESSION_DOMAIN` (e.g. `.yourdomain.com`), `SESSION_DRIVER=database`, `SESSION_LIFETIME=120`; remove any other `SESSION_*` so Laravel defaults apply. Also set `CACHE_STORE=database`, etc. Leave **Start Command** empty so the image entrypoint runs.
 2. **Worker**: New → Background Worker → same repo, Docker. Env: `DEPLOYMENT_TYPE=worker` and same DB/Redis/APP_KEY as web. Optional: build with `--build-arg DEPLOYMENT_TYPE=worker` for a smaller image.
 3. Add a **PostgreSQL** (or MySQL) instance in Render and attach its URL to both services—or use SQLite for a single instance. The image supports all three out of the box. Prefer a **custom domain** (e.g. `app.yourdomain.com`) over the platform default (`*.onrender.com`) and set **`APP_URL`** to the exact URL your app’s DNS points to—with a load balancer, `APP_URL` must match the public URL or links, redirects, and assets can break.
 

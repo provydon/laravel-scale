@@ -12,6 +12,7 @@ class InstallCommandTest extends TestCase
             '--no-octane' => true,
             '--no-dockerignore' => true,
             '--no-gitignore' => true,
+            '--no-env-example' => true,
             '--no-wayfinder' => true,
             '--no-ziggy' => true,
         ])
@@ -38,6 +39,7 @@ class InstallCommandTest extends TestCase
             '--no-octane' => true,
             '--no-dockerignore' => true,
             '--no-gitignore' => true,
+            '--no-env-example' => true,
             '--no-wayfinder' => true,
             '--no-ziggy' => true,
         ])
@@ -54,6 +56,7 @@ class InstallCommandTest extends TestCase
             '--no-octane' => true,
             '--no-dockerignore' => true,
             '--no-gitignore' => true,
+            '--no-env-example' => true,
             '--no-wayfinder' => true,
             '--no-ziggy' => true,
             '--no-frontend' => true,
@@ -70,6 +73,7 @@ class InstallCommandTest extends TestCase
             '--no-octane' => true,
             '--no-dockerignore' => true,
             '--no-gitignore' => true,
+            '--no-env-example' => true,
             '--no-wayfinder' => true,
             '--no-ziggy' => true,
         ])
@@ -79,5 +83,38 @@ class InstallCommandTest extends TestCase
         $dockerfile = file_get_contents(base_path('docker/Dockerfile'));
         $this->assertStringContainsString('backend/API only', $dockerfile);
         $this->assertStringNotContainsString('FROM node', $dockerfile);
+    }
+
+    public function test_scale_install_updates_env_example_session_vars(): void
+    {
+        $path = base_path('.env.example');
+        $original = file_exists($path) ? file_get_contents($path) : null;
+        $content = "APP_NAME=Laravel\nAPP_KEY=\nAPP_URL=https://example.com\nSESSION_DRIVER=file\nSESSION_ENCRYPT=false\nSESSION_PATH=/\n";
+        file_put_contents($path, $content);
+
+        try {
+            $this->artisan('scale:install', [
+                '--no-octane' => true,
+                '--no-dockerignore' => true,
+                '--no-gitignore' => true,
+                '--no-env-example' => false,
+                '--no-wayfinder' => true,
+                '--no-ziggy' => true,
+                '--no-frontend' => true,
+            ])->assertSuccessful();
+
+            $result = file_get_contents($path);
+            $this->assertStringContainsString('SESSION_DOMAIN=.example.com', $result);
+            $this->assertStringContainsString('SESSION_DRIVER=database', $result);
+            $this->assertStringContainsString('SESSION_LIFETIME=120', $result);
+            $this->assertStringNotContainsString('SESSION_ENCRYPT', $result);
+            $this->assertStringNotContainsString('SESSION_PATH=', $result);
+        } finally {
+            if ($original !== null) {
+                file_put_contents($path, $original);
+            } elseif (file_exists($path)) {
+                unlink($path);
+            }
+        }
     }
 }
