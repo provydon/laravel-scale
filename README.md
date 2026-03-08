@@ -60,7 +60,7 @@ Next, commit and push the files and folders the command added to your project—
    - `APP_NAME`: if the name contains spaces, wrap the value in an extra single quotation so it is parsed correctly, e.g. `APP_NAME='"Digitalize with AI"'`.
    - `DEPLOYMENT_TYPE=web`.
    - Database: `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`. Use any database (PostgreSQL, MySQL, SQLite, etc.); on Render you can add a PostgreSQL instance and copy its env vars.
-   - Stateless: For **session**, set only these three and remove any other `SESSION_*` from `.env.example` and your platform env so Laravel defaults apply (avoids session issues when deployed): `SESSION_DOMAIN=.example.com` (replace with your root domain, e.g. `.yourdomain.com`), `SESSION_DRIVER=database`, `SESSION_LIFETIME=120`. Also set `CACHE_STORE=database`, `QUEUE_CONNECTION=database`, and if using S3: `FILESYSTEM_DISK=s3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`.
+   - Stateless: For **session**, set only these three and remove any other `SESSION_*` from `.env.example` and your platform env so Laravel defaults apply (avoids session issues when deployed): `SESSION_DOMAIN=.example.com` (replace with your root domain, e.g. `.yourdomain.com`), `SESSION_DRIVER=database`, `SESSION_LIFETIME=120`. Set **`LOG_STACK=single,stderr`** so logs go to both file and stderr (your platform can capture stderr). Also set `CACHE_STORE=database`, `QUEUE_CONNECTION=database`, and if using S3: `FILESYSTEM_DISK=s3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`.
    - Optional—broadcasting: `BROADCAST_CONNECTION=pusher` (or reverb/ably) and driver-specific env vars (e.g. `PUSHER_APP_ID`, `PUSHER_APP_KEY`, etc.) on both Web and Worker.
 5. **Port**: set **Port** to **8000** (Octane listens on 8000).
 6. Save and deploy. Render will build the Docker image and start the web service.
@@ -137,6 +137,7 @@ Use **your own domain or subdomain** for the app instead of the platform's defau
 3. **Stateless setup**  
    In Render (and `.env.example`), set:
    - **Session**: Remove all existing `SESSION_*` variables, then set only `SESSION_DOMAIN=.example.com` (replace with your root domain, e.g. `.yourdomain.com`), `SESSION_DRIVER=database`, and `SESSION_LIFETIME=120`. Leave other session settings as Laravel defaults so sessions work properly in this stateless environment (see **docker/README.md** for details).
+   - **Logging**: Set **`LOG_STACK=single,stderr`** so the platform can capture logs from stderr.
    - **Cache**: `CACHE_STORE=database` (or `redis`).
    - **Files**: `FILESYSTEM_DISK=s3` and AWS_* (or other external disk).
    - **Queue**: `QUEUE_CONNECTION=database` (or `redis`) for the worker service.
@@ -175,7 +176,7 @@ See **docker/README.md** (published into your app) for the full stateless checkl
 1. **Local setup** – Create your Laravel app, develop as usual (Blade, Inertia, API, etc.).
 2. **Install once** – When ready to deploy: `composer require provydon/laravel-scale --dev --with-all-dependencies` and `php artisan scale:install`.
 3. **Commit** – Commit `docker/`, `.dockerignore`, `app/Providers/ForceHttpsServiceProvider.php`, `app/Http/Middleware/ForceHttpsMiddleware.php`, `bootstrap/providers.php`, `bootstrap/app.php`, `config/octane.php`, and the `.gitignore` changes. Push to GitHub/GitLab.
-4. **Stateless config** – In `.env.example` (and your platform’s env), remove all other `SESSION_*` and set only `SESSION_DOMAIN=.example.com` (use your root domain), `SESSION_DRIVER=database`, `SESSION_LIFETIME=120`; set `CACHE_STORE=database`, `QUEUE_CONNECTION=database`. Use S3 for uploads. Add Redis extension to Dockerfile if using Redis. See **docker/README.md** for the full session/deployment checklist.
+4. **Stateless config** – In `.env.example` (and your platform’s env), remove all other `SESSION_*` and set only `SESSION_DOMAIN=.example.com` (use your root domain), `SESSION_DRIVER=database`, `SESSION_LIFETIME=120`; set **`LOG_STACK=single,stderr`**; set `CACHE_STORE=database`, `QUEUE_CONNECTION=database`. Use S3 for uploads. Add Redis extension to Dockerfile if using Redis. See **docker/README.md** for the full session/deployment checklist.
 5. **Platform** – Create a Web Service (Docker) and a Background Worker on Render (or similar). Point both at your repo. Set **Dockerfile Path** to `docker/Dockerfile` for each. Add a database (e.g. PostgreSQL on Render) and set env vars, deploy.
 6. **Iterate** – Push code; platform rebuilds from the repo. No `scale:install` in CI—everything is already in the repo.
 

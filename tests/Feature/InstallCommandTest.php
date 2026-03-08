@@ -109,6 +109,7 @@ class InstallCommandTest extends TestCase
             $this->assertStringContainsString('SESSION_LIFETIME=120', $result);
             $this->assertStringNotContainsString('SESSION_ENCRYPT', $result);
             $this->assertStringNotContainsString('SESSION_PATH=', $result);
+            $this->assertStringContainsString('LOG_STACK=single,stderr', $result);
         } finally {
             if ($original !== null) {
                 file_put_contents($path, $original);

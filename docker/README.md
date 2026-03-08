@@ -92,6 +92,14 @@ SESSION_LIFETIME=120
 
 Replace `.example.com` with your actual root domain (e.g. `.yourdomain.com`). Do **not** add other `SESSION_*` vars (e.g. `SESSION_CONNECTION`, `SESSION_TABLE`, `SESSION_SECURE_COOKIE`, etc.); let Laravel use its defaults.
 
+### 1b. Logging → single + stderr
+
+Set **`LOG_STACK=single,stderr`** so logs are written to both the single log file and stderr. Your platform (Render, etc.) captures stderr, so you get logs in the dashboard without reading files. Laravel’s default `config/logging.php` stack channel uses `LOG_STACK` when set.
+
+```env
+LOG_STACK=single,stderr
+```
+
 ### 2. Cache → database or Redis
 
 - **Driver**: `CACHE_STORE=database` or `redis`.
@@ -149,6 +157,7 @@ PUSHER_APP_CLUSTER=...
 | Concern        | Use in production (stateless) |
 |----------------|--------------------------------|
 | Sessions       | Only `SESSION_DOMAIN`, `SESSION_DRIVER`, `SESSION_LIFETIME` (remove other `SESSION_*`; see above) |
+| Logging        | `LOG_STACK=single,stderr` (so platform captures logs from stderr) |
 | Cache          | `CACHE_STORE=database` or `redis` |
 | Uploads/files  | `FILESYSTEM_DISK=s3` (or other external disk) |
 | Queue          | `QUEUE_CONNECTION=database` or `redis` |
@@ -194,7 +203,7 @@ The Dockerfile comments mark these sections. After removal, the image will build
 
 ### Deploying on Render.com
 
-1. **Web Service**: New → Web Service → connect repo → Environment: **Docker**. Set **Dockerfile Path** to **`docker/Dockerfile`** (required; in Advanced if not visible). **Port**: **8000**. Env: `DEPLOYMENT_TYPE=web`, `APP_KEY`, DB_*, and stateless vars. If `APP_NAME` contains spaces, wrap it in an extra single quotation (e.g. `APP_NAME='"Digitalize with AI"'`). For session: set only `SESSION_DOMAIN` (e.g. `.yourdomain.com`), `SESSION_DRIVER=database`, `SESSION_LIFETIME=120`; remove any other `SESSION_*` so Laravel defaults apply. Also set `CACHE_STORE=database`, etc. Leave **Start Command** empty so the image entrypoint runs.
+1. **Web Service**: New → Web Service → connect repo → Environment: **Docker**. Set **Dockerfile Path** to **`docker/Dockerfile`** (required; in Advanced if not visible). **Port**: **8000**. Env: `DEPLOYMENT_TYPE=web`, `APP_KEY`, DB_*, and stateless vars. If `APP_NAME` contains spaces, wrap it in an extra single quotation (e.g. `APP_NAME='"Digitalize with AI"'`). For session: set only `SESSION_DOMAIN` (e.g. `.yourdomain.com`), `SESSION_DRIVER=database`, `SESSION_LIFETIME=120`; remove any other `SESSION_*` so Laravel defaults apply. Set **`LOG_STACK=single,stderr`** so the platform captures logs. Also set `CACHE_STORE=database`, etc. Leave **Start Command** empty so the image entrypoint runs.
 2. **Worker**: New → Background Worker → same repo, Docker. Env: `DEPLOYMENT_TYPE=worker` and same DB/Redis/APP_KEY as web. Optional: build with `--build-arg DEPLOYMENT_TYPE=worker` for a smaller image.
 3. Add a **PostgreSQL** (or MySQL) instance in Render and attach its URL to both services—or use SQLite for a single instance. The image supports all three out of the box. Prefer a **custom domain** (e.g. `app.yourdomain.com`) over the platform default (`*.onrender.com`) and set **`APP_URL`** to the exact URL your app’s DNS points to—with a load balancer, `APP_URL` must match the public URL or links, redirects, and assets can break.
 
