@@ -3,8 +3,8 @@
 This folder is published by **Laravel Scale** (`provydon/laravel-scale`). It’s the Docker and process layout that sets up most Laravel apps to scale (web + worker-scheduler, stateless). It contains:
 
 - **Dockerfile** – Multi-stage build: Node frontend (Vite, Tailwind/PostCSS), then PHP (FrankenPHP) + Supervisor. Includes MySQL, PostgreSQL, and SQLite drivers by default.
-- **docker-entrypoint.sh** – Builds `.env` from `.env.example` + Render env, runs migrations (web), starts Supervisor
-- **supervisord-web.conf** – Octane (FrankenPHP) on port 8000
+- **docker-entrypoint.sh** – Builds `.env` from `.env.example` + platform env, runs migrations (web), starts Octane on `$PORT` (web) or Supervisor (worker)
+- **supervisord-web.conf** – Reference config for Octane on a fixed port (web process is started by the entrypoint using `PORT` so Cloud Run, Render, etc. work)
 - **supervisord-worker.conf** – `queue:work` + `schedule:work`
 - **php.ini** – OPcache and upload limits
 
@@ -16,6 +16,10 @@ The Dockerfile uses `RUN --mount=type=cache,...` for Composer, which requires **
 - **Cloud Build:** add `env: ['DOCKER_BUILDKIT=1']` to the step that runs `docker build`.
 
 Without BuildKit, the build fails with “the --mount option requires BuildKit”.
+
+## Port (Cloud Run, Render, etc.)
+
+The **web** process listens on the **`PORT`** environment variable (default **8000** if unset). Cloud Run sets `PORT=8080`; Render and similar platforms set their own. The entrypoint starts Octane with `--port=$PORT` so the same image works everywhere. The worker deployment type still uses Supervisor and does not depend on PORT.
 
 ## PHP version
 

@@ -48,5 +48,7 @@ else
     php artisan optimize
     php artisan storage:link || true
     echo "yes" | php artisan octane:install --server=frankenphp 2>/dev/null || true
-    exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord-web.conf
+    # Use PORT from environment (Cloud Run sets 8080; Render/local may set other; default 8000)
+    : "${PORT:=8000}"
+    exec php /app/artisan octane:start --server=frankenphp --host=0.0.0.0 --port="$PORT" --admin-port=2019 --workers=2
 fi
