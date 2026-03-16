@@ -1,7 +1,8 @@
 # Laravel Octane (FrankenPHP) + Supervisor – backend/API only (no Node frontend)
-# Build: docker build -f docker/Dockerfile --build-arg DEPLOYMENT_TYPE=web -t app:latest .
+# Build: DOCKER_BUILDKIT=1 docker build -f docker/Dockerfile.backend -t app:latest .
 # Worker: same with DEPLOYMENT_TYPE=worker
 # Use this when your app has no Vite/Blade assets (API-only or frontend built elsewhere).
+# Requires BuildKit (RUN --mount cache for composer).
 
 FROM dunglas/frankenphp AS php-base
 

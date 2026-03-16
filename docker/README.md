@@ -8,6 +8,15 @@ This folder is published by **Laravel Scale** (`provydon/laravel-scale`). It’s
 - **supervisord-worker.conf** – `queue:work` + `schedule:work`
 - **php.ini** – OPcache and upload limits
 
+## BuildKit required
+
+The Dockerfile uses `RUN --mount=type=cache,...` for Composer, which requires **Docker BuildKit**. When building locally or in CI, enable it:
+
+- **Local:** `DOCKER_BUILDKIT=1 docker build -f docker/Dockerfile ...`
+- **Cloud Build:** add `env: ['DOCKER_BUILDKIT=1']` to the step that runs `docker build`.
+
+Without BuildKit, the build fails with “the --mount option requires BuildKit”.
+
 ## PHP version
 
 The Dockerfile uses the **dunglas/frankenphp** base image with **no tag**, so the image uses whatever the image’s **`latest`** tag is. The FrankenPHP image provides variants for **PHP 8.2, 8.3, 8.4, and 8.5**; `latest` typically tracks the newest of these and can change over time.
@@ -172,7 +181,7 @@ If you use **Laravel Wayfinder**, `scale:install` automatically removes the Wayf
 
 ## Frontend build (Vite + Tailwind)
 
-The frontend stage copies `vite.config.*`, `tailwind.config.*`, and **`postcss.config.*`** so that PostCSS and Tailwind run during `npm run build`. If your app uses Tailwind, ensure you have a root-level `postcss.config.js` (or `postcss.config.cjs`); the default Laravel + Vite + Tailwind setup already includes it. Without it, the built CSS can be empty or missing utility classes.
+The frontend stage copies the full app source (respecting `.dockerignore`) before `npm run build`, so **Tailwind v3** (with `tailwind.config.js` and `postcss.config.js`) and **Tailwind v4** (with `@tailwindcss/vite` only) both work without any Dockerfile changes. Ensure `.dockerignore` does not exclude `tailwind.config.*` or `postcss.config.*` if you use v3.
 
 ## If `npm run build` fails (other causes)
 

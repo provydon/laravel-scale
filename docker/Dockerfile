@@ -1,6 +1,7 @@
 # Laravel Octane (FrankenPHP) + Supervisor for Render (web + worker)
-# Build: docker build -f docker/Dockerfile --build-arg DEPLOYMENT_TYPE=web -t app:latest .
+# Build: DOCKER_BUILDKIT=1 docker build -f docker/Dockerfile --build-arg DEPLOYMENT_TYPE=web -t app:latest .
 # Worker: same with DEPLOYMENT_TYPE=worker
+# Requires BuildKit (RUN --mount cache for composer).
 
 FROM dunglas/frankenphp AS php-base
 
@@ -42,10 +43,8 @@ WORKDIR /frontend
 COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
 RUN npm ci 2>/dev/null || npm install --legacy-peer-deps
 
-COPY resources ./resources
-COPY vite.config.* ./
-COPY tailwind.config.* ./
-COPY postcss.config.* ./
+# Copy app source so both Tailwind v3 (tailwind.config.*, postcss.config.*) and v4 (@tailwindcss/vite only) work
+COPY . .
 
 RUN if [ "$SKIP_FRONTEND" = "1" ]; then mkdir -p public/build; else npm run build; fi
 # --- END FRONTEND ---
