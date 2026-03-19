@@ -14,8 +14,8 @@
   ],
   "require": {
     "php": "^8.2",
-    "laravel/framework": "^11.0|^12.0",
-    "laravel/octane": "^2.13"
+    "laravel/framework": "^11.0|^12.0|^13.0",
+    "laravel/octane": "^2.17"
   },
   "autoload": {
     "psr-4": {
@@ -30,11 +30,11 @@
     }
   },
   "minimum-stability": "stable",
-  "version": "1.14.0",
+  "version": "1.15.0",
   "require-dev": {
     "laravel/pint": "^1.0",
-    "orchestra/testbench": "^9.0|^10.0",
-    "phpunit/phpunit": "^11.0"
+    "orchestra/testbench": "^9.0|^10.0|^11.0",
+    "phpunit/phpunit": "^11.5|^12.0"
   },
   "scripts": {
     "pint": "pint",

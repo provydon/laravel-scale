@@ -25,7 +25,7 @@ The **web** process listens on the **`PORT`** environment variable (default **80
 
 The Dockerfile uses the **dunglas/frankenphp** base image with **no tag**, so the image uses whatever the image’s **`latest`** tag is. The FrankenPHP image provides variants for **PHP 8.2, 8.3, 8.4, and 8.5**; `latest` typically tracks the newest of these and can change over time.
 
-The app’s `composer.json` requires **PHP ^8.2**, so any of these versions is supported.
+The app’s `composer.json` typically requires **PHP ^8.2**; **Laravel 13** requires **PHP ^8.3**, so pin the image (e.g. `1-php8.3-bookworm`) when you upgrade.
 
 **To pin a specific PHP version**, use a tagged base image in the Dockerfile, for example:
 

@@ -169,7 +169,7 @@ See **docker/README.md** (published into your app) for the full stateless checkl
 - **app/Http/Middleware/ForceHttpsMiddleware.php** — runs at the start of the web stack so asset/Vite URLs use `https://` (avoids blank or unstyled pages from Mixed Content)
 - **docker/README.md** — stateless checklist (session/cache in DB or Redis, files on S3), PHP version, database (all three drivers by default), backend-only variant
 
-**Requirements:** PHP ^8.2, Laravel ^11.0|^12.0, laravel/octane ^2.13 (FrankenPHP). Run `composer update` in your app to pull compatible versions.
+**Requirements:** PHP ^8.2 (Laravel 13 needs PHP ^8.3 in your app), Laravel ^11.0|^12.0|^13.0, laravel/octane ^2.17 (FrankenPHP). Run `composer update` in your app to pull compatible versions.
 
 ## Typical dev journey
 

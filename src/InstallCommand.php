@@ -202,7 +202,7 @@ class InstallCommand extends Command
 
         $require = $json['require'] ?? [];
         $requireDev = $json['require-dev'] ?? [];
-        $version = $require['laravel/octane'] ?? $requireDev['laravel/octane'] ?? '^2.13';
+        $version = $require['laravel/octane'] ?? $requireDev['laravel/octane'] ?? '^2.17';
 
         if (isset($require['laravel/octane'])) {
             return;
