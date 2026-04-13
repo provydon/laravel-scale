@@ -36,6 +36,7 @@ class InstallCommand extends Command
             $this->info('Installing Octane (FrankenPHP)...');
             $this->call('octane:install', ['--server' => 'frankenphp']);
             $this->ensureOctaneInRequire();
+            $this->tuneOctaneConfig();
         }
 
         $usesWayfinder = ! $this->option('no-wayfinder') && $this->usesWayfinder();
@@ -358,6 +359,22 @@ class InstallCommand extends Command
         }
     }
 
+    private function tuneOctaneConfig(): void
+    {
+        $path = base_path('config/octane.php');
+        if (! file_exists($path)) {
+            return;
+        }
+
+        $contents = file_get_contents($path);
+
+        // Lower garbage collection threshold from 50MB to 25MB for 512MB containers
+        $contents = str_replace("'garbage' => 50", "'garbage' => 25", $contents);
+
+        file_put_contents($path, $contents);
+        $this->info('Tuned Octane garbage collection threshold (50 → 25 MB) for smaller containers.');
+    }
+
     private const GITIGNORE_WAYFINDER_MARKER = '# Laravel Scale - Wayfinder';
 
     private function updateGitignore(bool $usesWayfinder = false): void
@@ -424,6 +441,7 @@ class InstallCommand extends Command
             if (preg_match('/^#?\s*LOG_STACK\s*=/', $trimmed)) {
                 return false;
             }
+
             return true;
         });
 

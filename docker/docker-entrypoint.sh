@@ -50,5 +50,5 @@ else
     echo "yes" | php artisan octane:install --server=frankenphp 2>/dev/null || true
     # Use PORT from environment (Cloud Run sets 8080; Render/local may set other; default 8000)
     : "${PORT:=8000}"
-    exec php /app/artisan octane:start --server=frankenphp --host=0.0.0.0 --port="$PORT" --admin-port=2019 --workers=2
+    exec php /app/artisan octane:start --server=frankenphp --host=0.0.0.0 --port="$PORT" --admin-port=2019 --workers=1 --max-requests=500
 fi

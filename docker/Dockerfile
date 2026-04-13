@@ -18,15 +18,13 @@ RUN install-php-extensions \
     pdo_sqlite \
     zip
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     supervisor \
-    git \
     curl \
     unzip \
-    default-libmysqlclient-dev \
     libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
@@ -69,8 +67,7 @@ ENV OCTANE_SERVER=frankenphp
 
 WORKDIR /app
 
-COPY composer.json composer.lock* ./
-# Optional: add "COPY auth.json ./" here if you use private Composer repos
+COPY composer.json composer.lock* auth.json* ./
 
 RUN --mount=type=cache,target=/root/.composer \
     composer install --no-dev --no-interaction --optimize-autoloader --no-scripts --ignore-platform-req=php
