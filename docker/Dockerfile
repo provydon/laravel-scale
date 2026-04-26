@@ -70,9 +70,12 @@ WORKDIR /app
 COPY composer.json composer.lock* auth.json* ./
 
 RUN --mount=type=cache,target=/root/.composer \
-    composer install --no-dev --no-interaction --optimize-autoloader --no-scripts --ignore-platform-req=php
+    composer install --no-dev --no-interaction --no-autoloader --no-scripts --ignore-platform-req=php
 
 COPY . /app
+
+RUN --mount=type=cache,target=/root/.composer \
+    composer dump-autoload --optimize --no-dev --classmap-authoritative --no-scripts
 
 COPY docker/supervisord-web.conf /etc/supervisor/conf.d/supervisord-web.conf
 COPY docker/supervisord-worker.conf /etc/supervisor/conf.d/supervisord-worker.conf
